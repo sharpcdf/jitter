@@ -1,31 +1,19 @@
-import std/[terminal, os]
-
+import std/[terminal, os, strutils]
+import src/parse
 var args: seq[string]
+var flags: seq[string]
 const version {.strdefine.} = "undefined"
 let homeDir = getHomeDir() & ".jitter/"
+proc printHelp()
 when not declared(commandLineParams):
     styledEcho(fgRed, "Unable to get arguments")
     quit()
 else:
     args = commandLineParams()
 
-proc printHelp() =
-    echo """Usage:
-        jtr <command> [args]
-
-    install [gh:|gl:|cb:|sh:]<[user/]repo>             Installs the binaries of the given repository, if avaliable.
-    update <[user/]repo>                               Updates the specified binaries, or all binaries if none are specified.
-    remove <[user/]repo>                               Removes the specified binaries from your system.
-    search [gh:|gl:|cb:|sh:]<[user/]repo>              Searches for binaries that match the given repositories, returning them if found.
-    list [gh|gl|cb|sh]                                 Lists binaries downloaded from the specified source, or all if nothing is specified.
-    help                                               Prints this help.
-    version                                            Prints the version of jitter
-
-    --replace                                          Removes all other binaries with the same name after updating/installing
-    --version=<tag>                                    Specifies a version to download                                          
-    -ver=<tag>
-    """
-    
+for f in args:
+    if f.startsWith("-"):
+        args.add(f)
 if (args.len == 1 and args[0] == "help") or args.len == 0:
     printHelp()
     quit()
@@ -33,7 +21,10 @@ if (args.len == 1 and args[0] == "help") or args.len == 0:
 if args.len >= 1:
     case args[0]:
     of "install":
-        echo "filler"
+        if args.len >= 2:
+            if parse.install(args[1]): styledEcho(fgGreen, "Binaries successfully installed")
+        else:
+            styledEcho(fgRed, "Error: Not a valid repo. Read 'jtr help' for more info")
     of "update":
         echo "filler"
     of "remove":
@@ -54,3 +45,20 @@ if args.len >= 1:
         printHelp()
         styledEcho(fgRed, "Error: Unknown command")
         quit()
+
+proc printHelp() =
+    echo """Usage:
+        jtr <command> [args]
+
+    install [gh:|gl:|cb:|sh:]<[user/]repo>             Installs the binaries of the given repository, if avaliable.
+    update <[user/]repo>                               Updates the specified binaries, or all binaries if none are specified.
+    remove <[user/]repo>                               Removes the specified binaries from your system.
+    search [gh:|gl:|cb:|sh:]<[user/]repo>              Searches for binaries that match the given repositories, returning them if found.
+    list                                               Lists binaries all binaries downloaded.
+    help                                               Prints this help.
+    version                                            Prints the version of jitter
+
+    --replace                                          Removes all other binaries with the same name after updating/installing
+    --version=<tag>                                    Specifies a version to download                                          
+    -ver=<tag>
+    """
