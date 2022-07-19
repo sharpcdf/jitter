@@ -1,6 +1,6 @@
 var mainfile = "jitter.nim"
 var maininstallfile = "mug/installer.nim"
-var version = "0.1.0"
+var version = "0.1.1"
 var nimble = "/home/sharpcdf/.nimble/pkgs"
 
 
@@ -14,7 +14,8 @@ task installer, "Builds the mug installer":
     switch("warnings", "off")
     switch("define", "release")
     switch("verbosity", "0")
-    exec("nim c --out:'bin/mug' --opt:size --hints:off --warnings:off --define:release --verbosity:0 --NimblePath:" & nimble & " " & mainfile)
+    echo "Building static jitter"
+    exec("nim release")
     echo "Compiling"
     setCommand("c", maininstallfile)
 
@@ -48,5 +49,7 @@ task release, "Builds the release version of jitter":
     switch("opt", "size")
     switch("hints", "off")
     switch("warnings", "off")
-    echo "Done\nCompiling.."
     setCommand("c", mainfile)
+
+task setup, "Installs required nimble libraries":
+    exec("nimble install zippy")

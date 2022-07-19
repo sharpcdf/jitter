@@ -2,6 +2,7 @@ import std/[terminal, httpclient, json, strutils, os]
 from std/uri import encodeQuery
 from std/osproc import execCmdEx
 import extract
+import parse
 let homeDir = getHomeDir() & ".jitter/"
 let dDir = homeDir & "nerve/"
 
@@ -56,25 +57,29 @@ proc downloadRelease(repo: string, make: bool) =
         if dirExists(dDir & user & "__" & name & "__" & tag):
             styledEcho(fgRed, "Error: Package " & repo & " " & tag & " is already downloaded. Possibly try 'jtr remove " & repo & "'?")
             quit()
-        styledEcho(fgBlue, "Looking for x64 or amd64 tarball")
+        styledEcho(fgBlue, "Looking for compatible archives")
         #TODO make download specific to cpu type
         for a in assets:
-            var name = a["name"].getStr()
-            #Checks if asset has extension .tar.gz, .tar.xz, .tgz, is not ARM, and is not source code
-            if (name.endsWith(".tar.gz") or name.endsWith(".tar.xz") or name.endsWith(".tgz")) and (name.contains("x86_64") or name.contains("x64") or name.contains("amd") or name.contains("amd64")) and not name.startsWith(tag): #TODO Check to see if there's a more efficient way
+            var n = a["name"].getStr()
+            #Checks if asset has extension .tar.gz, .tar.xz, .tgz, is not ARM
+            if isCompatibleExt(n) and isCompatibleCPU(n) and isCompatibleOS(n):
                 dlink = a["browser_download_url"].getStr()
-                if name.endsWith(".tar.gz"):
+                if n.endsWith(".tar.gz"):
                     ext = ".tar.gz"
-                elif name.endsWith(".tar.xz"):
+                elif n.endsWith(".tar.xz"):
                     ext = ".tar.xz"
-                elif name.endsWith(".tgz"):
+                elif n.endsWith(".tgz"):
                     ext = ".tgz"
-                styledEcho(fgGreen, "Tarball found: ", fgYellow, styleBlink, name)
+                elif n.endsWith(".zip"):
+                    ext = ".zip"
+                else:
+                    continue
+                styledEcho(fgGreen, "Archive found: ", fgYellow, styleBlink, n)
                 break
         if dlink == "":
-            styledEcho(fgRed, "No tarballs found for ", repo , ", exiting")
+            styledEcho(fgRed, "No archives found for ", repo , ", exiting")
             quit()
-        styledEcho(fgBlue, "Downloading binaries from url ", fgYellow, styleBlink, dlink)
+        styledEcho(fgBlue, "Downloading files from url ", fgYellow, styleBlink, dlink)
         var data = client.getContent(dlink)
         #full path to the tarball
         var dpath = dDir & name & ext

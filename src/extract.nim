@@ -5,14 +5,17 @@
 
 import std/[terminal, os, strutils]
 from osproc import execCmdEx
-import zippy/tarballs
-
+import zippy/tarballs as tb
+import zippy/ziparchives as za
 var baseDir = getHomeDir() & ".jitter/"
 var nerve = baseDir & "nerve/"
-proc extract*(tarball, name: string, make: bool) =
+proc extract*(z, name: string, make: bool) =
     styledEcho(fgBlue, "Extracting files")
-    extractAll(tarball, nerve & name)
-    removeFile(tarball)
+    if z.splitFile().ext == ".zip":
+        za.extractAll(z, nerve & name)
+    else:
+        tb.extractAll(z, nerve & name)
+    removeFile(z)
     styledEcho(fgGreen, "Files extracted")
     #if the --no-make flag isnt passed than this happens
     if make:
