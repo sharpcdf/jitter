@@ -1,6 +1,11 @@
 var mainfile = "jitter.nim"
 var maininstallfile = "mug/installer.nim"
 var version = "0.1.0"
+var nimble = "/home/sharpcdf/.nimble/pkgs"
+
+
+switch("NimblePath", nimble)
+
 task installer, "Builds the mug installer":
     echo "Setting args"
     switch("out", "bin/mug")
@@ -9,6 +14,7 @@ task installer, "Builds the mug installer":
     switch("warnings", "off")
     switch("define", "release")
     switch("verbosity", "0")
+    exec("nim c --out:'bin/mug' --opt:size --hints:off --warnings:off --define:release --verbosity:0 --NimblePath:" & nimble & " " & mainfile)
     echo "Compiling"
     setCommand("c", maininstallfile)
 

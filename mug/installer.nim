@@ -36,11 +36,16 @@ if args.len == 1:
         setFilePermissions(base & "bin/jtr", {fpOthersExec, fpUserExec, fpGroupExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
         if changeEnv: toEnv()
         styledEcho(fgMagenta, "Done! Now you can add 'export PATH=$PATH:" & base & "bin' to your .bashrc file to add Jitter to your bash path.")
+    elif args[0] == "uninstall":
+        styledEcho(fgBlue, "Uninstalling Jitter")
+        removeDir(getHomeDir() & ".jitter")
+        styledEcho(fgGreen, "Done!")
 if args.len == 0 or (args.len == 1 and args[0] == "help"):
     echo """Usage
         mug <command>
 
     install          Installs jitter for the current user
+    uninstall        Uninstalls jitter and deletes all installed packages
     upgrade          Upgrades jitter to the newest version
     help             Displays this help
     """
