@@ -21,7 +21,7 @@ Jitter's source code is separated into two directories. The `mug` directory hold
 
 - Jitter commands are not fully documented yet, but luckily you can look in `jitter.nim` and see the different commands and subcommands that are usable.
 - As of right now, Jitter only supports github repositories. New sources may be added with future releases.
-- The update command currently does not do anything.
+- ~~The update command currently does not do anything.~~
 - All listed flags in `jtr help` currently do not work.
 
 ## Quick Start
