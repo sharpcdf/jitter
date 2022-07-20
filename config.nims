@@ -1,10 +1,13 @@
+import os
+
 var mainfile = "jitter.nim"
 var maininstallfile = "mug/installer.nim"
-var version = "0.0.3"
-var nimble = "/home/sharpcdf/.nimble/pkgs"
+var version = "0.1.0"
+var nimble = getHomeDir() & ".nimble/pkgs"
 
 
 switch("NimblePath", nimble)
+switch("define", "version:" & version)
 
 task installer, "Builds the mug installer":
     echo "Setting args"
@@ -33,7 +36,6 @@ task debug, "Builds the debug version of jitter":
     switch("verbosity", "3")
     switch("define", "debug")
     switch("define", "ssl")
-    switch("define", "version:" & version)
     switch("out", "bin/jtr")
     switch("opt", "speed")
     echo "Done\nCompiling.."
@@ -44,7 +46,6 @@ task release, "Builds the release version of jitter":
     switch("verbosity", "0")
     switch("define", "release")
     switch("define", "ssl")
-    switch("define", "version:" & version)
     switch("out", "bin/jtr")
     switch("opt", "size")
     switch("hints", "off")

@@ -6,6 +6,8 @@ import src/sourcehut as sh
 import src/codeberg as cb
 import src/log
 from std/uri import encodeQuery
+from std/osproc import execCmd
+
 #TODO add config file to manage bin & download directory
 var args: seq[string]
 var flags: seq[string]
@@ -15,23 +17,24 @@ proc printHelp()
 proc install(src: string, make: bool): bool
 proc remove(pkg: string, ver: string)
 proc search(repo, ver: string, tags: bool)
+proc update(pkg, tag: string)
 
+#setup
 when not declared(commandLineParams):
     fatal "Unable to get arguments"
     quit()
 else:
     args = commandLineParams()
-
 for f in args:
     if f.startsWith("-"):
         args.add(f)
-
 if (args.len == 1 and args[0] == "help") or args.len == 0:
     printHelp()
     quit()
+#end
 
-#TODO add upgrade command to get latest jitter version
 if args.len >= 1:
+    echo "hello there, this is a debug build"
     case args[0]:
     of "install":
         try:
@@ -39,7 +42,17 @@ if args.len >= 1:
         except:
             fatal "No repo given. Read 'jtr help' for more info"
     of "update":
-        echo "filler"
+        try:
+            if args[1] == "this" or args[1] == "jtr" or args[1] == "jitter":
+                if install("sharpcdf/jitter", true):
+                    success "Jitter installer successfully downloaded"
+                else:
+                    fatal "Failed to install jitter"
+                if execCmd("mug upgrade") != 0: fatal "Failed to upgrade jitter. Try manually upgrading by running 'mug upgrade'"
+            else:
+                update(args[1], getTagFromGit(args[1]))
+        except:
+            fatal "Update failed"
     of "remove":
         try:
             #if it contains a tag, pass it to remove()
@@ -60,7 +73,6 @@ if args.len >= 1:
         except:
             search(args[1], getTagFromGit(args[1]), false)
     of "list":
-        #TODO add option to list avaliable tags for a repo
         for f in walkDir(baseDir & "bin"):
             let file = extractFilename(f.path)
             if f.path == getAppDir() & "jtr" and hasExecPerms(f.path): continue
@@ -80,10 +92,10 @@ proc printHelp() =
     echo """Usage:
         jtr <command> [args]
 
-    install [gh:|gl:|cb:|sh:]<[user/]repo[@tag]>       Installs the binaries of the given repository, if avaliable.
-    update <user/repo>                                 Updates the specified binaries, or all binaries if none are specified.
+    install [gh:]<[user/]repo[@tag]>                   Installs the binaries of the given repository, if avaliable.
+    update <user/repo[@version]>                       Updates the specified binaries, or all binaries if none are specified.
     remove <user/repo[@version]>                       Removes the specified binaries from your system.
-    search <[user/]repo> [tags|tag|true]                                      Searches for binaries that match the given repositories, returning them if found.
+    search <[user/]repo> [tags|tag|true]               Searches for binaries that match the given repositories, returning them if found.
     list                                               Lists all executables downloaded.
     catalog                                            Lists all installed packages.
     help                                               Prints this help.
@@ -102,9 +114,9 @@ proc install(src: string, make: bool): bool =
     var name = src
     var srctype = parseInputSource(name)
     var tag = name.getTagFromGit()
+
     case srctype:
     of github:
-        #* version is temporarily ""
         gh.download(name, tag, make)
         return true
     of undefined:
@@ -112,21 +124,24 @@ proc install(src: string, make: bool): bool =
         #gl.download(name, tag, make)
         #sh.download(name, tag, make)
         #cb.download(name, tag, make)
+        return true
     else:
         return false
 
-proc remove(pkg: string, ver: string) =
+proc remove(pkg, ver: string) =
     if not pkg.hasRepoFormat():
         fatal "Invalid format given. Check 'jtr help' for more info"
     var user = pkg.split("/")[0]
     var name = pkg.split("/")[1]
     var front = user & "__" & name
     var installed = false
+
     for p in walkDir(baseDir & "nerve"):
         if p.path.splitPath.tail.contains(name):
             installed = true
     if not installed:
         fatal "package " & name & " is not installed."
+    
     if ver == "":
         ask "What tag of " & pkg & " would you like to remove?"
         #prints all packages with the same name
@@ -134,73 +149,95 @@ proc remove(pkg: string, ver: string) =
             if p.path.splitPath().tail.startsWith(front):
                 list p.path.splitPath().tail.split("__")[2]
         list "all"
+
         var i = readLine(stdin)
         #if package exists, remove all associated symlinks and remove the package directory
         if dirExists(baseDir & "nerve/" & front & "__" & i):
             var all = front & "__" & i
             info "Removing " & pkgToGitFormat(all)
             var dir = baseDir & "nerve/" & all
+
             for f in walkDir(baseDir & "bin"):
                 if f.kind != pcLinkToFile: continue
                 var symp = expandSymlink(f.path)
+
                 if symp.contains(dir):
                     info "Removing symlink " & f.path.splitFile().name
                     f.path.removeFile()
                     continue
+            
             info "Removing folder " & dir
             removeDir(baseDir & "nerve/" & front & "__" & i)
         elif i.toLowerAscii() == "all":
             info "Removing all versions of " & pkg
+
             for f in walkDir(baseDir & "bin"):
                 if f.kind != pcLinkToFile: continue
                 var symp = expandSymlink(f.path)
+
                 if front in symp:
                     info "Removing symlink " & f.path.splitFile().name
                     f.path.removeFile()
                     continue
+            
             for f in walkDir(baseDir & "nerve"):
                 if front in f.path:
                     info "Removing folder " & f.path.splitPath().tail
                     removeDir(f.path)
         else:
             fatal "tag " & i & " is not installed"
+        
         success "Done"
     else:
         var all = front & "__" & ver
         info "Removing " & pkgToGitFormat(all)
         var dir = baseDir & "nerve/" & all
+
         for f in walkDir(baseDir & "bin"):
             if f.kind != pcLinkToFile: continue
             var symp = expandSymlink(f.path)
+
             if symp.contains(dir):
                 info "Removing symlink " & f.path.splitFile().name
                 f.path.removeFile()
                 continue
+        
         info "Removing folder " & dir
         removeDir(baseDir & "nerve/" & all)
 
-#TODO add rest of the sources to search
 proc search(repo, ver: string, tags: bool) =
     var c = newHttpClient()
+
     if not tags:
         var ghurl = "https://api.github.com/search/repositories?" & encodeQuery({"q": repo})
         var content: string
+
         try:
             content = c.getContent(ghurl)
         except HttpRequestError:
             fatal "Failed to get repositories"
+
         var j = content.parseJson()["items"].getElems()
+
         for e in j:
             list "Github: " & e["full_name"].getStr()
     else:
         var ghurl = "https://api.github.com/repos/" & repo & "/releases"
         var content: string
+
         try:
             content = c.getContent(ghurl)
         except HttpRequestError:
             fatal "Failed to get repository tags. Repository does not exist."
+        
         var j = content.parseJson().getElems()
         info "Listing release tags for " & repo
+
         for e in j:
             list e["tag_name"].getStr()
 
+proc update(pkg, tag: string) =
+    remove(pkg, tag)
+    var p = pkg
+    gh.download(p, tag, true)
+    success "Successfully updated " & pkg 

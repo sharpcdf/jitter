@@ -8,23 +8,32 @@ from osproc import execCmdEx
 import zippy/tarballs as tb
 import zippy/ziparchives as za
 import log
+
 var baseDir = getHomeDir() & ".jitter/"
 var nerve = baseDir & "nerve/"
+
 proc extract*(z, name: string, make: bool) =
     info "Extracting files"
-    if z.splitFile().ext == ".zip":
-        za.extractAll(z, nerve & name)
-    else:
-        tb.extractAll(z, nerve & name)
+    try:
+        if z.splitFile().ext == ".zip":
+            za.extractAll(z, nerve & name)
+        else:
+            tb.extractAll(z, nerve & name)
+    except ZippyError:
+        #raise
+        fatal "Failed to extract archive"
     removeFile(z)
     success "Files extracted"
+
     #if the --no-make flag isnt passed than this happens
     if make:
         for f in walkDirRec(nerve & name):
             if f.extractFilename().toLowerAscii() == "makefile":
                 if execCmdEx("make -C " & f.splitFile().dir).exitCode != 0:
                     fatal "Error: failed to make " & f
+    
     info "Adding executables to bin"
+
     #Creates symlinks for executables and adds them to the bin
     for f in walkDir(nerve & name):
         if f.kind == pcDir: continue

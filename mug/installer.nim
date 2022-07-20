@@ -16,24 +16,27 @@ when defined(debug):
 
 if args.len == 1:
     if args[0] == "upgrade":
-        echo "filler"
+        writeFile(base & "bin/jtr", jtr)
     elif args[0] == "install":
         if dirExists(base):
             styledEcho(fgRed, "Jitter is already installed!")
             quit()
         styledEcho(fgBlue, "Creating base directory in " & base)
         createDir(base)
+
         styledEcho(fgYellow, "Creating bin and nerve directories")
         createDir(base & "bin") #*Where the jitter exe and symlinks to the binaries will be held
         createDir(base & "nerve") #*where the actualy binaries will be held
+
         styledEcho(fgGreen, "Creating config directory")
         createDir(base & "config") #*config files
+
         styledEcho(fgBlue, "Extracting jitter")
-        var f = open(base & "bin/jtr", fmWrite)
-        f.write(jtr)
-        close(f)
+        writeFile(base & "bin/jtr", jtr)
+
         styledEcho(fgYellow, "Setting executable permissions")
         setFilePermissions(base & "bin/jtr", {fpOthersExec, fpUserExec, fpGroupExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
+
         if changeEnv: toEnv()
         styledEcho(fgMagenta, "Done! Now you can add 'export PATH=$PATH:" & base & "bin' to your .bashrc file to add Jitter to your bash path.")
     elif args[0] == "uninstall":
@@ -44,6 +47,7 @@ if args.len == 1:
         else:
             styledEcho(fgRed, "Error: No jitter path was found.")
             quit()
+
 if args.len == 0 or (args.len == 1 and args[0] == "help"):
     echo """Usage
         mug <command>
@@ -53,6 +57,7 @@ if args.len == 0 or (args.len == 1 and args[0] == "help"):
     upgrade          Upgrades jitter to the newest version
     help             Displays this help
     """
+
 proc toEnv() {.deprecated: "Should not be used because of the possible risks".} =
     styledEcho(fgGreen, "Adding to path..")
     var fcheck = readFile(getHomeDir() & ".bashrc")
