@@ -36,3 +36,5 @@ Download the Jitter installer from the releases, and then after navigating to th
 6. `jtr catalog` - lists all downloaded repositories
 7. `jtr remove VSCodium/vscodium` - removes VSCodium/vscodium from your system
 8. `jtr install VSCodium/vscodium@1.69.0` - installs VSCodium/vscodium release with the tag `1.69.0`
+9. `jtr update VSCodium/vscodium` - updates vscodium to the latest version
+10. `jtr update (this|jitter|jtr) - updates jitter to the latest release
