@@ -27,11 +27,11 @@ Jitter's source code is separated into two directories. The `mug` directory hold
 Download the Jitter installer from the releases, and then after navigating to the download directory in your terminal run `./mug install`. This will create all needed directories for downloading and using executables. You can then run `jtr help` after adding it to your path.
 
 ### Example Usage
-`jtr install gh:VSCodium/vscodium` - installs repository VSCodium/vscodium from github.
-`jtr install vscodium` - searches for all repositories that have the name `vscodium`, and then installs the chosen one
-`jtr search vscodium` - searches and lists all repositories that have `vscodium` in their name.
-`jtr search VSCodium/vscodium (tag|tags|true)` - searches and lists all release tags of repository `VSCodium/vscodium`
-`jtr list` - lists all executables in jitter's bin.
-`jtr catalog` - lists all downloaded repositories
-`jtr remove VSCodium/vscodium` - removes VSCodium/vscodium from your system
-`jtr install VSCodium/vscodium@1.69.0` - installs VSCodium/vscodium release with the tag `1.69.0`
+1. `jtr install gh:VSCodium/vscodium` - installs repository VSCodium/vscodium from github.
+2. `jtr install vscodium` - searches for all repositories that have the name `vscodium`, and then installs the chosen one
+3. `jtr search vscodium` - searches and lists all repositories that have `vscodium` in their name.
+4. `jtr search VSCodium/vscodium (tag|tags|true)` - searches and lists all release tags of repository `VSCodium/vscodium`
+5. `jtr list` - lists all executables in jitter's bin.
+6. `jtr catalog` - lists all downloaded repositories
+7. `jtr remove VSCodium/vscodium` - removes VSCodium/vscodium from your system
+8. `jtr install VSCodium/vscodium@1.69.0` - installs VSCodium/vscodium release with the tag `1.69.0`
