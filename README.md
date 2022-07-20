@@ -2,7 +2,7 @@
 A git-based binary manager for linux
 
 ## What is it?
-Jitter is a binary manager for linux. It searches github, gitlab, codeberg, and sourcehut for executables that are avaliable to download.
+Jitter is a binary manager for linux. It searches github, gitlab, codeberg, and sourcehut for executables that are avaliable to download. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
 
 
 ## Building
