@@ -37,9 +37,13 @@ if args.len == 1:
         if changeEnv: toEnv()
         styledEcho(fgMagenta, "Done! Now you can add 'export PATH=$PATH:" & base & "bin' to your .bashrc file to add Jitter to your bash path.")
     elif args[0] == "uninstall":
-        styledEcho(fgBlue, "Uninstalling Jitter")
-        removeDir(getHomeDir() & ".jitter")
-        styledEcho(fgGreen, "Done!")
+        if dirExists(getHomeDir() & ".jitter"):
+            styledEcho(fgBlue, "Uninstalling Jitter")
+            removeDir(getHomeDir() & ".jitter")
+            styledEcho(fgGreen, "Done!")
+        else:
+            styledEcho(fgRed, "Error: No jitter path was found.")
+            quit()
 if args.len == 0 or (args.len == 1 and args[0] == "help"):
     echo """Usage
         mug <command>

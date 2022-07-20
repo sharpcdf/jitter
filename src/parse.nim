@@ -51,3 +51,32 @@ proc hasExecPerms*(file: string): bool =
         return true
     else:
         return false
+
+#pass folder name owner__repo__tag and return owner/repo@tag
+proc pkgToGitFormat*(name: string): string =
+    var u = name.split("__")[0]
+    var r = name.split("__")[1]
+    var v = name.split("__")[2]
+    return u & "/" & r & "@" & v
+
+#gets tag from owner__repo__tag
+proc getTagFromPackageName*(name: string): string =
+    return name.split("__")[2]
+
+#gets tag from owner/repo@tag
+proc getTagFromGit*(name: var string): string =
+    try:
+        var t = name.split("@")
+        if t.len == 2:
+            name = t[0]
+            return t[1]
+        else:
+            return ""
+    except:
+        return ""
+
+proc hasRepoFormat*(name: string): bool =
+    if "/" in name:
+        if not name.startsWith("/") and not name.endsWith("/"):
+            return true
+    return false

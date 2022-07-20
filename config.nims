@@ -1,6 +1,6 @@
 var mainfile = "jitter.nim"
 var maininstallfile = "mug/installer.nim"
-var version = "0.1.1"
+var version = "0.0.3"
 var nimble = "/home/sharpcdf/.nimble/pkgs"
 
 
