@@ -26,7 +26,7 @@ proc parseInputSource*(url: var string): SourceType =
 
 proc isCompatibleExt*(file: string): bool =
     result = false
-    const ext = [".tar.gz", ".tar.xz", ".tgz", ".zip"]
+    const ext = [".tar.gz", ".tgz", ".zip"]
     for s in ext:
         if file.endsWith(s):
             return true
