@@ -1,13 +1,10 @@
 import std/[terminal, os, strutils, httpclient, json]
 import src/parse
 import src/github as gh
-import src/gitlab as gl
-import src/sourcehut as sh
-import src/codeberg as cb
 import src/log
 from std/uri import encodeQuery
 from std/osproc import execCmd
-
+#TODO add 'jtr update all' to update all packages
 #TODO add config file to manage bin & download directory
 var args: seq[string]
 var flags: seq[string]
@@ -25,9 +22,6 @@ when not declared(commandLineParams):
     quit()
 else:
     args = commandLineParams()
-for f in args:
-    if f.startsWith("-"):
-        args.add(f)
 if (args.len == 1 and args[0] == "help") or args.len == 0:
     printHelp()
     quit()
