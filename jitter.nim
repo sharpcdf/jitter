@@ -6,7 +6,7 @@ import src/sourcehut as sh
 import src/codeberg as cb
 import src/log
 from std/uri import encodeQuery
-
+#TODO add config file to manage bin & download directory
 var args: seq[string]
 var flags: seq[string]
 const version {.strdefine.} = "undefined"
@@ -30,6 +30,7 @@ if (args.len == 1 and args[0] == "help") or args.len == 0:
     printHelp()
     quit()
 
+#TODO add upgrade command to get latest jitter version
 if args.len >= 1:
     case args[0]:
     of "install":
