@@ -2,7 +2,7 @@
 A git-based binary manager for linux
 
 ## What is it?
-Jitter is a binary manager for linux. It searches github, gitlab, codeberg, and sourcehut for executables that are avaliable to download. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
+Jitter is a binary manager for linux. It searches github for executables that are avaliable to download. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
 
 
 ## Building
@@ -17,9 +17,10 @@ Jitter's source code is separated into two directories. The `mug` directory hold
 
 ## Notes
 - Jitter is still in development, and there will most likely be bugs. If you encounter an unkown bug, please open an issue :)
-- While you are able to download multiple versions of a repository, it will most likely cause conflicts and errors. If this happens, you can simply remove the unneeded package from Jitter.
+- While you are able to download multiple versions of a repository, it will most likely cause conflicts. If this happens, you can simply remove the unneeded package from Jitter.
+
 - Jitter commands are not fully documented yet, but luckily you can look in `jitter.nim` and see the different commands and subcommands that are usable.
-- As of right now, Jitter only supports github repositories. A new search source will be added with every new release of the installer.
+- As of right now, Jitter only supports github repositories. New sources may be added with future releases.
 - The update command currently does not do anything.
 - All listed flags in `jtr help` currently do not work.
 
