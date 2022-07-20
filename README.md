@@ -6,7 +6,7 @@ Jitter is a binary manager for linux. It searches github, gitlab, codeberg, and 
 
 
 ## Building
-Note: Building requires the Nim Compiler >= 1.6.6 and Zippy, which you can get by running `nim setup`
+Note: Building requires the Nim Compiler >= 1.6.6 and Zippy, which you can get by running `nim setup`.
 To build jitter's installer, clone this repository and run `nim installer`. After building, run `./bin/mug` to install jitter.
 To develop jitter, git clone the repository and run `nim dinstaller` or `nim debug` after making changes.
 
