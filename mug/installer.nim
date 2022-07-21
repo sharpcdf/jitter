@@ -1,52 +1,50 @@
 import std/[terminal, os, httpclient, strutils]
-
+import ../src/log
 var base = getHomeDir() & ".jitter/"
 var args: seq[string]
 const jtr = slurp("../bin/jtr")
-var changeEnv = false
-proc toEnv()
+proc addEnv()
 
 when declared(commandLineParams):
     args = commandLineParams()
 else:
-    styledEcho(fgRed, "Error: Unable to get arguments")
-    quit()
-when defined(debug):
-    changeEnv = true
+    fatal "Unable to get arguments"
 
 if args.len == 1:
     if args[0] == "upgrade":
         writeFile(base & "bin/jtr", jtr)
     elif args[0] == "install":
         if dirExists(base):
-            styledEcho(fgRed, "Jitter is already installed!")
+            fatal "Jitter is already installed!"
             quit()
-        styledEcho(fgBlue, "Creating base directory in " & base)
+        info "Creating base directory in " & base
         createDir(base)
 
-        styledEcho(fgYellow, "Creating bin and nerve directories")
+        info "Creating bin and nerve directories"
         createDir(base & "bin") #*Where the jitter exe and symlinks to the binaries will be held
         createDir(base & "nerve") #*where the actualy binaries will be held
 
-        styledEcho(fgGreen, "Creating config directory")
+        info "Creating config directory"
         createDir(base & "config") #*config files
 
-        styledEcho(fgBlue, "Extracting jitter")
+        info "Extracting Jitter"
         writeFile(base & "bin/jtr", jtr)
 
-        styledEcho(fgYellow, "Setting executable permissions")
+        info "Setting executable permissions"
         setFilePermissions(base & "bin/jtr", {fpOthersExec, fpUserExec, fpGroupExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
-
-        if changeEnv: toEnv()
-        styledEcho(fgMagenta, "Done! Now you can add 'export PATH=$PATH:" & base & "bin' to your .bashrc file to add Jitter to your bash path.")
+        ask "Do you want to add Jitter to your path? [y/N]"
+        var i = readLine(stdin)
+        if i == "yes" or i == "y":
+            addEnv()
+        elif i == "no" or i == "n" or i == "":
+            styledEcho(fgMagenta, "Done! Now you can add 'export PATH=$PATH:" & base & "bin' to your .bashrc file to add Jitter to your bash path.")
     elif args[0] == "uninstall":
         if dirExists(getHomeDir() & ".jitter"):
-            styledEcho(fgBlue, "Uninstalling Jitter")
+            info "Uninstalling Jitter"
             removeDir(getHomeDir() & ".jitter")
-            styledEcho(fgGreen, "Done!")
+            success "Done!"
         else:
-            styledEcho(fgRed, "Error: No jitter path was found.")
-            quit()
+            fatal "Error: No jitter path was found."
 
 if args.len == 0 or (args.len == 1 and args[0] == "help"):
     echo """Usage
@@ -58,7 +56,7 @@ if args.len == 0 or (args.len == 1 and args[0] == "help"):
     help             Displays this help
     """
 
-proc toEnv() {.deprecated: "Should not be used because of the possible risks".} =
+proc addEnv() =
     styledEcho(fgGreen, "Adding to path..")
     var fcheck = readFile(getHomeDir() & ".bashrc")
     if not fcheck.contains("export PATH=$PATH:" & base & "bin"):
@@ -70,7 +68,7 @@ proc toEnv() {.deprecated: "Should not be used because of the possible risks".} 
     if fileExists("/usr/bin/fish"):
         styledEcho(fgGreen, "Fish shell found, appending jitter to path")
         fcheck = readFile(getHomeDir() & ".config/fish/config.fish")
-        if fcheck.contains("set -U fish_user_paths $fish_user_paths " & base & "bin"):
+        if not fcheck.contains("set -U fish_user_paths $fish_user_paths " & base & "bin"):
             var f = open(getHomeDir() & ".config/fish/config.fish", fmAppend)
             f.writeLine("set -U fish_user_paths $fish_user_paths " & base & "bin")
         else:

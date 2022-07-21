@@ -10,7 +10,7 @@ Note: Building requires the Nim Compiler >= 1.6.6 and Zippy, to get Zippy and ot
 To build jitter's installer, clone this repository, run `nim installer`. After building, run `./bin/mug install` to install jitter.
 To develop jitter, git clone the repository and run `nim dinstaller` or `nim debug` after making changes.
 
-Warning: both the `debug` and `dinstaller` tasks purely show compiler information at compile time, and the debug installer automatically adds jitter to your path.
+Note: Both the `debug` and `dinstaller` tasks purely show compiler information at compile time, and otherwise do the same thing as `release` and `installer`
 
 ## Structure
 Jitter's source code is separated into two directories. The `mug` directory holds the source code for jitter's installer/updater, mug, while the `src` directory holds the source code for jitter itself.
@@ -31,10 +31,13 @@ Download the Jitter installer from the releases, and then after navigating to th
 1. `jtr install gh:VSCodium/vscodium` - installs repository VSCodium/vscodium from github.
 2. `jtr install vscodium` - searches for all repositories that have the name `vscodium`, and then installs the chosen one
 3. `jtr search vscodium` - searches and lists all repositories that have `vscodium` in their name.
-4. `jtr search VSCodium/vscodium (tag|tags|true)` - searches and lists all release tags of repository `VSCodium/vscodium`
+4. `jtr search VSCodium/vscodium` - searches and lists all release tags of repository `VSCodium/vscodium`
 5. `jtr list` - lists all executables in jitter's bin.
 6. `jtr catalog` - lists all downloaded repositories
 7. `jtr remove VSCodium/vscodium` - removes VSCodium/vscodium from your system
 8. `jtr install VSCodium/vscodium@1.69.0` - installs VSCodium/vscodium release with the tag `1.69.0`
 9. `jtr update VSCodium/vscodium` - updates vscodium to the latest version
 10. `jtr update (this|jitter|jtr)` - updates jitter to the latest release
+11. `jtr update all` - updates all installed packages
+
+Note: repositories are case insensitive, and all AppImages installed are converted to lowercase. `jtr install VSCodium/vscodium` is equivalent to `jtr install vscodium/vscodium`.

@@ -1,3 +1,14 @@
+#[
+    Term reference-
+    package refers to repositories downloaded onto your system
+    repository refers to repositories (duh)
+    owner refers to the owner of the repository
+    tag refers to the release tag(typically a version number)
+
+    Package folder names follow the pattern owner__repo__tag
+    All executables added to the bin have no filename and are executable or are AppImages
+]#
+
 import std/[terminal, os, strutils, httpclient, json]
 import src/parse
 import src/github as gh
@@ -7,7 +18,6 @@ from std/osproc import execCmd
 #TODO add 'jtr update all' to update all packages
 #TODO add config file to manage bin & download directory
 var args: seq[string]
-var flags: seq[string]
 const version {.strdefine.} = "undefined"
 var baseDir = getHomeDir() & ".jitter/"
 proc printHelp()
@@ -26,16 +36,21 @@ if (args.len == 1 and args[0] == "help") or args.len == 0:
     printHelp()
     quit()
 #end
-
+#if theres at least a command passed (e.g. jtr install ...)
 if args.len >= 1:
-    echo "hello there, this is a debug build"
+    #echo "hello there, this is a debug build"
     case args[0]:
     of "install":
+        #ditto
         try:
-            if install(args[1], true): success "Binaries successfully installed"
+            if install(args[1], true): 
+                success "Binaries successfully installed"
+            else:
+                fatal "Failed to install repository"
         except:
             fatal "No repo given. Read 'jtr help' for more info"
     of "update":
+        #if 2nd arg is this or jtr or jitter, update jitter itself. otherwise, update the given package
         try:
             if args[1] == "this" or args[1] == "jtr" or args[1] == "jitter":
                 if install("sharpcdf/jitter", true):
@@ -43,13 +58,19 @@ if args.len >= 1:
                 else:
                     fatal "Failed to install jitter"
                 if execCmd("mug upgrade") != 0: fatal "Failed to upgrade jitter. Try manually upgrading by running 'mug upgrade'"
+            elif args[1] == "all":
+                for f in walkDir(baseDir & "nerve"):
+                    echo f.path.splitPath().tail
+                    var g = pkgToGitFormat(f.path.splitPath().tail)
+                    echo g
+                    update(g, getTagFromGit(g))
             else:
                 update(args[1], getTagFromGit(args[1]))
         except:
             fatal "Update failed"
     of "remove":
+        #if it contains a tag, pass it to remove(), otherwise, run remove() interactively
         try:
-            #if it contains a tag, pass it to remove()
             if not args[1].contains("@"):
                 remove(args[1], "")
             else:
@@ -58,30 +79,36 @@ if args.len >= 1:
         except:
             fatal "Must provide a package name. Read 'jtr help' for more info"
     of "search":
+        #if 2nd arg is tags or tag or true, print avaliable release tags for the given repo. otherwise, search for a repo
         try:
-            if args[2] == "tags" or args[2] == "tag" or args[2] == "true":
-                if hasRepoFormat(args[1]):
-                    search(args[1], getTagFromGit(args[1]), true)
-                else:
-                    fatal "Invalid format, must be 'jtr search owner/repo (tags|tag|true)'"
+            if hasRepoFormat(args[1]):
+                search(args[1], getTagFromGit(args[1]), true)
+            else:
+                search(args[1], getTagFromGit(args[1]), false)
         except:
-            search(args[1], getTagFromGit(args[1]), false)
+            fatal "Failed to search"
+        quit()
     of "list":
+        #lists all executables in .jitter/bin
         for f in walkDir(baseDir & "bin"):
             let file = extractFilename(f.path)
             if f.path == getAppDir() & "jtr" and hasExecPerms(f.path): continue
             list file
     of "version":
+        #prints the build version
         styledEcho(fgCyan, "Jitter version ", fgYellow, version)
         styledEcho("For more information visit ", fgGreen, "https://github.com/sharpcdf/jitter")
         quit()
     of "catalog":
+        #lists all installed packages(repos)
         for d in walkDir(baseDir & "nerve"):
             list pkgToGitFormat(d.path.splitPath().tail)
+        quit()
     else:
         printHelp()
         fatal "Unknown command"
 
+#ditto
 proc printHelp() =
     echo """Usage:
         jtr <command> [args]
@@ -104,6 +131,7 @@ proc printHelp() =
     """
 
 #* auto source search, github -> gitlab -> sourcehut -> codeberg
+#installs repo interactively or directly based on source and then runs the corrosponding download proc, in the main case its gh.download() for github downloads
 proc install(src: string, make: bool): bool =
     var name = src
     var srctype = parseInputSource(name)
@@ -122,6 +150,7 @@ proc install(src: string, make: bool): bool =
     else:
         return false
 
+#removes installed packages from the filesystem
 proc remove(pkg, ver: string) =
     if not pkg.hasRepoFormat():
         fatal "Invalid format given. Check 'jtr help' for more info"
@@ -131,7 +160,7 @@ proc remove(pkg, ver: string) =
     var installed = false
 
     for p in walkDir(baseDir & "nerve"):
-        if p.path.splitPath.tail.contains(name):
+        if p.path.splitPath.tail.toLowerAscii().contains(name):
             installed = true
     if not installed:
         fatal "package " & name & " is not installed."
@@ -199,6 +228,8 @@ proc remove(pkg, ver: string) =
         info "Removing folder " & dir
         removeDir(baseDir & "nerve/" & all)
 
+#TODO add automatic release tags when provided owner/repo instead of using a bool
+#searches for either repos or repo tags based on the arg format (read above)
 proc search(repo, ver: string, tags: bool) =
     var c = newHttpClient()
 
@@ -230,8 +261,9 @@ proc search(repo, ver: string, tags: bool) =
         for e in j:
             list e["tag_name"].getStr()
 
+#lazy update(the only way for now)
 proc update(pkg, tag: string) =
     remove(pkg, tag)
     var p = pkg
-    gh.download(p, tag, true)
-    success "Successfully updated " & pkg 
+    if install(p, true): success "Downloaded latest version"
+    success "Successfully updated " & pkg

@@ -24,13 +24,15 @@ proc parseInputSource*(url: var string): SourceType =
     else:
         return undefined
 
+#if file ends with tarball or zip file extension than return true
 proc isCompatibleExt*(file: string): bool =
     result = false
-    const ext = [".tar.gz", ".tgz", ".zip"]
+    const ext = [".tar.gz", ".tgz", ".zip", ".AppImage"]
     for s in ext:
         if file.endsWith(s):
             return true
 
+#if file has arm in the name than returns false
 proc isCompatibleCPU*(file: string): bool = 
     result = true
     const cpu = ["arm32", "arm64", "-arm", "arm-"]
@@ -38,6 +40,7 @@ proc isCompatibleCPU*(file: string): bool =
         if s in file:
             return false
 
+#if the file has anything other than linux in the name than returns false
 proc isCompatibleOS*(file: string): bool =
     result = true
     const os = ["darwin", "windows", "osx", "macos", "win"]
@@ -45,6 +48,7 @@ proc isCompatibleOS*(file: string): bool =
         if s in file:
             return false
 
+#Checks if file has either user exec, group exec or others exec perms
 proc hasExecPerms*(file: string): bool =
     var perms = getFilePermissions(file)
     if fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms:
@@ -75,6 +79,7 @@ proc getTagFromGit*(name: var string): string =
     except:
         return ""
 
+#returns try if name follows the format owner/repo, otherwise false
 proc hasRepoFormat*(name: string): bool =
     if "/" in name:
         if not name.startsWith("/") and not name.endsWith("/"):
