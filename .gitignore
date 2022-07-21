@@ -1,2 +1,8 @@
-/bin
-/mug.tar.xz
+# ignore files with no extention:
+*
+!*/
+!*.*
+
+trial.*
+*.sublime-*
+*.out
