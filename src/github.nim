@@ -6,6 +6,7 @@ import parse
 import log
 
 #TODO add support for appimage downloads
+#TODO prefer appimages -> .tar.gz -> .tgz -> .zip
 let homeDir = getHomeDir() & ".jitter/"
 let dDir = homeDir & "nerve/"
 var client = newHttpClient(headers=newHttpHeaders([("accept", "application/vnd.github+json")]))

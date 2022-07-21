@@ -11,7 +11,7 @@ import log
 
 var baseDir = getHomeDir() & ".jitter/"
 var nerve = baseDir & "nerve/"
-#TODO add support for appimages
+
 proc extract*(z, name: string, make: bool) =
     info "Extracting files"
     try:
