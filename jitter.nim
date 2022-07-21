@@ -58,7 +58,7 @@ if args.len >= 1:
                 else:
                     fatal "Failed to install jitter"
                 if execCmd("mug upgrade") != 0: fatal "Failed to upgrade jitter. Try manually upgrading by running 'mug upgrade'"
-            elif args[1] == "all":
+            elif args[1] == "all" or args[1] == "":
                 for f in walkDir(baseDir & "nerve"):
                     echo f.path.splitPath().tail
                     var g = pkgToGitFormat(f.path.splitPath().tail)
@@ -113,19 +113,19 @@ proc printHelp() =
     echo """Usage:
         jtr <command> [args]
 
-    install [gh:]<[user/]repo[@tag]>                   Installs the binaries of the given repository, if avaliable.
-    update <user/repo[@version]>                       Updates the specified binaries, or all binaries if none are specified.
-    remove <user/repo[@version]>                       Removes the specified binaries from your system.
-    search <[user/]repo> [tags|tag|true]               Searches for binaries that match the given repositories, returning them if found.
+    install [gh:]<[user/]repo[@tag]>                   Installs the given repository, if avaliable.
+    update <user/repo[@version]>                       Updates the specified packages, or all packages if none are specified.
+    remove <user/repo[@version]>                       Removes the specified package from your system.
+    search <[user/]repo> [tags|tag|true]               Searches for repositories that match the given term, returning them if found.
     list                                               Lists all executables downloaded.
     catalog                                            Lists all installed packages.
     help                                               Prints this help.
-    version                                            Prints the version of jitter
+    version                                            Prints the version of jitter and exits.
 
-    --replace                                          Removes all other binaries with the same name after updating/installing
+    --replace                                          Removes all other packages with the same name after updating/installing
     --version=<tag>                                    Specifies a version to download                                          
     -ver=<tag>
-    --no-make                                          If makefiles are found in the repo, jitter ignores them. By default, jitter runs all found makefiles
+    --no-make                                          If makefiles are found in the downloaded package, jitter ignores them. By default, jitter runs all found makefiles
     -nm
     --exact-match                                      Only searches for repos that exactly match the search term
     """
