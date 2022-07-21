@@ -40,6 +40,7 @@ proc extract*(z, name: string, make: bool) =
     info "Adding executables to bin"
 
     #Creates symlinks for executables and adds them to the bin
+    #TODO check if theres no executables, if so inform and ask to remove package
     for f in walkDirRec(nerve & name):
         if hasExecPerms(f):
             if f.splitFile().ext == "" or f.splitFile().ext == ".AppImage":
