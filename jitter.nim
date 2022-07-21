@@ -92,7 +92,7 @@ if args.len >= 1:
         #lists all executables in .jitter/bin
         for f in walkDir(baseDir & "bin"):
             let file = extractFilename(f.path)
-            if f.path == getAppDir() & "jtr" and hasExecPerms(f.path): continue
+            if f.path == baseDir & "bin/jtr" and hasExecPerms(f.path): continue
             list file
     of "version":
         #prints the build version
