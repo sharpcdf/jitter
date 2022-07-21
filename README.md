@@ -18,11 +18,10 @@ Jitter's source code is separated into two directories. The `mug` directory hold
 ## Notes
 - Jitter is still in development, and there will most likely be bugs. If you encounter an unkown bug, please open an issue :)
 - While you are able to download multiple versions of a repository, it will most likely cause conflicts. If this happens, you can simply remove the unneeded package from Jitter.
-
 - Jitter commands are not fully documented yet, but luckily you can look in `jitter.nim` and see the different commands and subcommands that are usable.
 - As of right now, Jitter only supports github repositories. New sources may be added with future releases.
-- ~~The update command currently does not do anything.~~
 - All listed flags in `jtr help` currently do not work.
+- You can currently update jitter to a newer version by running `jitter update this` and then running `mug upgrade` afterwards. An easier way to update is being worked on.
 
 ## Quick Start
 Download the Jitter installer from the releases, and then after navigating to the download directory in your terminal run `./mug install`. This will create all needed directories for downloading and using executables. You can then run `jtr help` after adding it to your path.
