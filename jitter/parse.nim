@@ -5,7 +5,7 @@ type
     owner*, repo*, tag*: string
 
   SourceType* = enum
-    None, 
+    Undefined, 
     GitHub,
     GitLab,
     SourceHut,
@@ -15,11 +15,11 @@ const
   # Supported
   extensions = [".tar.gz", ".tgz", ".zip"]
   # Not supported
-  notCpus = ["arm32", "arm64", "-arm", "arm-"]
-  notOses = ["darwin", "windows", "osx", "macos", "win"]
+  unsupportedCPU = ["arm32", "arm64", "-arm", "arm-"]
+  unsupportedOS = ["darwin", "windows", "osx", "macos", "win"]
 
 proc package*(owner, repo, tag: string): Package = 
-  Package(owner: owner, repo: repo, tag: tag)
+  return Package(owner: owner, repo: repo, tag: tag)
 
 proc parseInputSource*(input: string): tuple[source: SourceType, output: string] =
   ## Parses the source prefix and returns the (source, input without the preffix).
@@ -28,33 +28,33 @@ proc parseInputSource*(input: string): tuple[source: SourceType, output: string]
     elif input.startsWith("gl:"): GitLab
     elif input.startsWith("cb:"): CodeBerg
     elif input.startsWith("sh:"): SourceHut
-    else: None
+    else: Undefined
 
-  if result.source != None:
+  if result.source != Undefined:
     result.output = input[3..^1]
   else:
     result.output = input
 
-proc isCompatibleExt*(path: string): bool =
-  path.splitFile.ext in extensions
+proc isCompatibleExt*(file: string): bool =
+  file.splitFile().ext in extensions
 
-proc isCompatibleCPU*(path: string): bool = 
+proc isCompatibleCPU*(file: string): bool = 
   result = true
-  for cpu in notCpus:
-    if cpu in path:
+  for cpu in unsupportedCPU:
+    if cpu in file:
       return false
 
-proc isCompatibleOS*(path: string): bool =
+proc isCompatibleOS*(file: string): bool =
   result = true
-  for os in notOses:
-    if os in path:
+  for os in unsupportedOS:
+    if os in file:
       return false
 
-proc hasExecPerms*(path: string): bool =
-  let perms = getFilePermissions(path)
-  result = fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms
+proc hasExecPerms*(file: string): bool =
+  let perms = getFilePermissions(file)
+  return fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms
 
-proc parsePkg*(pkg: string): tuple[ok: bool, pkg: Package] = 
+proc parsePkgFormat*(pkg: string): tuple[ok: bool, pkg: Package] = 
   ## Parses packages in two formats:
   ## - `owner__repo__tag`
   ## - `owner/repo[@tag]` Tag is optional
@@ -77,5 +77,5 @@ proc gitFormat*(pkg: Package): string =
   else:
     fmt"{pkg.owner}/{pkg.repo}"
 
-proc dirFormat*(pkg: Package): string = 
+proc pkgFormat*(pkg: Package): string = 
   fmt"{pkg.owner}__{pkg.owner}__{pkg.tag}"

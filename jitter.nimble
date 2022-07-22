@@ -4,7 +4,7 @@ version          = "0.3.0"
 author           = "sharpcdf"
 description      = "A git-based binary manager for linux."
 license          = "MIT"
-srcDir           = "src"
+srcDir           = "."
 namedBin["jitter"] = "jtr"
 
 # Dependencies
