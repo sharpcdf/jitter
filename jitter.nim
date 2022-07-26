@@ -8,18 +8,21 @@ import jitter/[github, parse, log]
 #TODO add config file to manage bin & download directory
 
 const version {.strdefine.} = "undefined"
+when not defined(version):
+  raise newException(ValueError, "Version has to be specified -d:version=x.y.z")
+
 let baseDir = getHomeDir() / ".jitter"
 let nerveDir = baseDir / "nerve"
 let binDir = baseDir / "bin"
 
 proc getInstalledPkgs*(): seq[Package] = 
   for kind, path in walkDir(nerveDir):
-    if kind == pcDir and (let (ok, pkg) = path.splitPath.tail.parsePkg(); ok):
+    if kind == pcDir and (let (ok, pkg) = path.splitPath.tail.parsePkgFormat(); ok):
       result.add(pkg)
 
 proc install(input: string, make = true) = 
   let (srctype, input) = input.parseInputSource()
-  let (ok, pkg) = input.parsePkg()
+  let (ok, pkg) = input.parsePkgFormat()
 
   if not ok:
     fatal fmt"Couldn't parse package {input}"
@@ -37,7 +40,7 @@ proc install(input: string, make = true) =
   of CodeBerg:
     #pkg.cbDownload(make)
     discard
-  of None:
+  of Undefined:
     fatal "Unknown source type"
     success = false
 
@@ -46,14 +49,14 @@ proc install(input: string, make = true) =
 
 proc remove(pkg: Package) = 
   for kind, path in walkDir(binDir):
-    if kind == pcLinkToFile and pkg.dirFormat in path.expandSymlink():
+    if kind == pcLinkToFile and pkg.pkgFormat in path.expandSymlink():
       info fmt"Removing symlink {path}"
       path.removeFile()
 
-  removeDir(nerveDir / pkg.dirFormat)
+  removeDir(nerveDir / pkg.pkgFormat)
 
 proc remove(input: string) = 
-  let (ok, pkg) = input.parsePkg()
+  let (ok, pkg) = input.parsePkgFormat()
   if not ok:
     fatal fmt"Couldn't parse package {input}"
 
@@ -98,7 +101,7 @@ proc update(input: string, make = true) =
     else:
       input
 
-  let (ok, pkg) = input.parsePkg()
+  let (ok, pkg) = input.parsePkgFormat()
   if not ok:
     fatal fmt"Couldn't parse package {input}"
 
@@ -113,7 +116,7 @@ const parser = newParser:
   flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
   run:
     if opts.version: ## If the version flag was passed
-      styledEcho(fgCyan, "Jitter version ", fgYellow, NimblePkgVersion)
+      styledEcho(fgCyan, "Jitter version ", fgYellow, version)
       styledEcho("For more information visit ", fgGreen, "https://github.com/sharpcdf/jitter")
 
   command("install"): ## Create an install command
@@ -122,7 +125,7 @@ const parser = newParser:
     run: 
       opts.input.install(not opts.parentOpts.nomake)
   command("update"): ## Create an update command
-    help("Updates the specified packages, or all packages if none are specified.           user/repo[@tag]") ## Help message
+    help("Updates the specified packages, or all packages if Undefined are specified.           user/repo[@tag]") ## Help message
     arg("input") ## Positional argument called input
     run:
       opts.input.update(not opts.parentOpts.nomake)
@@ -136,7 +139,7 @@ const parser = newParser:
     arg("query") ## Positional argument called query
     run:
       if opts.query.find(AllChars - IdentChars) >= 0: # If it finds more than IdentChars it should be a package and not a repo
-        let (ok, pkg) = opts.query.parsePkg()
+        let (ok, pkg) = opts.query.parsePkgFormat()
         if not ok:
           fatal fmt"Couldn't parse package {opts.query}"
 

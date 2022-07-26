@@ -45,7 +45,7 @@ proc ghSearch*(repo: string): seq[Package] =
     client.close()
 
   for repo in content.parseJson()["items"]:
-    result.add(parsePkg(repo["full_name"].getStr()).pkg)
+    result.add(parsePkgFormat(repo["full_name"].getStr()).pkg)
 
 proc downloadRelease(pkg: Package, make = true) =
   let url = 
@@ -68,7 +68,7 @@ proc downloadRelease(pkg: Package, make = true) =
   let pkg = package(pkg.owner, pkg.repo, data["tag_name"].getStr())
 
   #ditto
-  if dirExists(nerveDir / pkg.dirFormat):
+  if dirExists(nerveDir / pkg.pkgFormat):
     fatal fmt"Package {pkg.gitFormat} already exists."
 
   info "Looking for compatible archives"
@@ -94,7 +94,7 @@ proc downloadRelease(pkg: Package, make = true) =
   client.downloadFile(downloadUrl, nerveDir / downloadPath)
   success fmt"Downloaded {pkg.gitFormat}"
 
-  extract(nerveDir / downloadPath, pkg.dirFormat, make)
+  extract(nerveDir / downloadPath, pkg.pkgFormat, make)
 
 proc ghDownload*(pkg: Package, make = true) =
     # If it has a username, run the code, otherwise searches for the closest matching one
@@ -114,7 +114,7 @@ proc ghDownload*(repo: string, make = true) =
   let pkgs = repo.ghSearch()
   ask "Which repository would you like to download? (owner/repo)"
   let answer = stdin.readLine().strip()
-  let (ok, pkg) = answer.parsePkg()
+  let (ok, pkg) = answer.parsePkgFormat()
 
   if not ok:
     fatal "Couldn't parse package {answer}"
