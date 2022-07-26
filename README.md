@@ -56,6 +56,3 @@ Options:
 - `jtr install VSCodium/vscodium@1.69.0`: installs VSCodium/vscodium release with the tag `1.69.0`.
 - `jtr update VSCodium/vscodium`: updates vscodium to the latest version.
 - `jtr update (this|jitter|jtr)`: updates jitter to the latest release.
-
-## About
-Your about info.

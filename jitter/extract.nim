@@ -6,6 +6,8 @@ import zippy/ziparchives
 import log
 
 let baseDir = getHomeDir() & ".jitter/"
+let nerveDir = baseDir / "nerve"
+let binDir = baseDir / "bin"
 
 proc extract*(path, toDir: string, make = true) =
   ## Extracts `path` inside `toDir` directory.
@@ -13,9 +15,9 @@ proc extract*(path, toDir: string, make = true) =
   info "Extracting files"
   try:
     if path.splitFile().ext == ".zip":
-      ziparchives.extractAll(path, baseDir / "nerve" / toDir)
+      ziparchives.extractAll(path, nerveDir / toDir)
     else:
-      tarballs.extractAll(path, baseDir / "nerve" / toDir)
+      tarballs.extractAll(path, nerveDir / toDir)
   except ZippyError:
     fatal "Failed to extract archive"
 
@@ -24,7 +26,7 @@ proc extract*(path, toDir: string, make = true) =
 
   #if the --no-make flag isnt passed than this happens
   if make:
-    for path in walkDirRec(baseDir / "nerve" / toDir):
+    for path in walkDirRec(nerveDir / toDir):
       if path.extractFilename().toLowerAscii() == "makefile":
         if execCmdEx(fmt"make -C {path.splitFile.dir}").exitCode != 0:
           fatal fmt"Error: failed to make {path}"
@@ -32,10 +34,10 @@ proc extract*(path, toDir: string, make = true) =
   info "Adding executables to bin"
 
   #Creates symlinks for executables and adds them to the bin
-  for kind, path in walkDir(baseDir / "nerve" / toDir):
+  for kind, path in walkDir(nerveDir / toDir):
     if kind == pcDir: continue
 
     let perms = getFilePermissions(path)
     if (fpGroupExec in perms or fpOthersExec in perms or fpUserExec in perms) and path.splitFile.ext == "":
-      path.createSymlink(baseDir / "bin" & path.extractFilename())
+      path.createSymlink(binDir & path.extractFilename())
       success fmt"Created symlink {path.extractFilename()}"

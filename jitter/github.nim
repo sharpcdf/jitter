@@ -6,9 +6,9 @@ import extract, parse, log
 #TODO prefer appimages -> .tar.gz -> .tgz -> .zip
 
 let baseDir = getHomeDir() & ".jitter/"
-let dDir = baseDir & "nerve/"
+let nerveDir = baseDir / "nerve"
 
-proc listPkgGhReleases*(pkg: Package): seq[string] = 
+proc ghListReleases*(pkg: Package): seq[string] = 
   ## List and return pkg release tags.
   let url = fmt"https://api.github.com/repos/{pkg.owner}/{pkg.repo}/releases"
   let client = newHttpClient()
@@ -17,14 +17,14 @@ proc listPkgGhReleases*(pkg: Package): seq[string] =
   try:
     content = client.getContent(url)
   except HttpRequestError:
-    fatal "Failed to fetch repository"
+    fatal "Failed to find repository"
   finally:
     client.close()
 
   let data = content.parseJson()
 
   if data.kind != JArray:
-    fatal fmt"Failed to fetch {pkg.gitFormat} releases"
+    fatal fmt"Failed to find {pkg.gitFormat} releases"
 
   info fmt"Listing release tags for {pkg.gitFormat}"
 
@@ -32,7 +32,7 @@ proc listPkgGhReleases*(pkg: Package): seq[string] =
     list release["tag_name"].getStr()
     result.add(release["tag_name"].getStr())
 
-proc searchGhRepo*(repo: string): seq[Package] = 
+proc ghSearch*(repo: string): seq[Package] = 
   let url = "https://api.github.com/search/repositories?" & encodeQuery({"q": repo})
   let client = newHttpClient()
   var content: string
@@ -40,15 +40,11 @@ proc searchGhRepo*(repo: string): seq[Package] =
   try:
     content = client.getContent(url)
   except HttpRequestError:
-    fatal "Failed to fetch repositories"
+    fatal "Failed to find repositories"
   finally:
     client.close()
 
-  let data = content.parseJson()
-  info &"Found {data[\"total_count\"]} repositories matching the query"
-
-  for repo in data["items"]:
-    list &"Github: {repo[\"full_name\"].getStr()}"
+  for repo in content.parseJson()["items"]:
     result.add(parsePkg(repo["full_name"].getStr()).pkg)
 
 proc downloadRelease(pkg: Package, make = true) =
@@ -72,7 +68,7 @@ proc downloadRelease(pkg: Package, make = true) =
   let pkg = package(pkg.owner, pkg.repo, data["tag_name"].getStr())
 
   #ditto
-  if dirExists(baseDir / "nerve" / pkg.dirFormat):
+  if dirExists(nerveDir / pkg.dirFormat):
     fatal fmt"Package {pkg.gitFormat} already exists."
 
   info "Looking for compatible archives"
@@ -95,17 +91,17 @@ proc downloadRelease(pkg: Package, make = true) =
       
   info fmt"Downloading {downloadUrl}"
 
-  client.downloadFile(downloadUrl, baseDir / "nerve" / downloadPath)
+  client.downloadFile(downloadUrl, nerveDir / downloadPath)
   success fmt"Downloaded {pkg.gitFormat}"
 
-  extract(baseDir / "nerve" / downloadPath, pkg.dirFormat, make)
+  extract(nerveDir / downloadPath, pkg.dirFormat, make)
 
 proc ghDownload*(pkg: Package, make = true) =
     # If it has a username, run the code, otherwise searches for the closest matching one
     # if pkg.tag.len > 0:
     pkg.downloadRelease(make)
     # else:
-    #   let tags = pkg.listPkgGhReleases()
+    #   let tags = pkg.ghListReleases()
     #   ask "Which tag would you like to download?"
     #   let answer = stdin.readLine().strip()
 
@@ -115,7 +111,7 @@ proc ghDownload*(pkg: Package, make = true) =
     #   package(pkg.owner, pkg.repo, answer).downloadRelease()
 
 proc ghDownload*(repo: string, make = true) = 
-  let pkgs = repo.searchGhRepo()
+  let pkgs = repo.ghSearch()
   ask "Which repository would you like to download? (owner/repo)"
   let answer = stdin.readLine().strip()
   let (ok, pkg) = answer.parsePkg()

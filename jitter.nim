@@ -8,10 +8,12 @@ import jitter/[github, parse, log]
 #TODO add config file to manage bin & download directory
 
 const version {.strdefine.} = "undefined"
-let baseDir = getHomeDir() & ".jitter/"
+let baseDir = getHomeDir() / ".jitter"
+let nerveDir = baseDir / "nerve"
+let binDir = baseDir / "bin"
 
 proc getInstalledPkgs*(): seq[Package] = 
-  for kind, path in walkDir(baseDir / "nerve"):
+  for kind, path in walkDir(nerveDir):
     if kind == pcDir and (let (ok, pkg) = path.splitPath.tail.parsePkg(); ok):
       result.add(pkg)
 
@@ -43,12 +45,12 @@ proc install(input: string, make = true) =
     success "Binaries successfully installed"
 
 proc remove(pkg: Package) = 
-  for kind, path in walkDir(baseDir / "bin"):
+  for kind, path in walkDir(binDir):
     if kind == pcLinkToFile and pkg.dirFormat in path.expandSymlink():
       info fmt"Removing symlink {path}"
       path.removeFile()
 
-  removeDir(baseDir / "nerve" / pkg.dirFormat)
+  removeDir(nerveDir / pkg.dirFormat)
 
 proc remove(input: string) = 
   let (ok, pkg) = input.parsePkg()
@@ -106,51 +108,50 @@ proc update(input: string, make = true) =
   success fmt"Successfully updated {pkg}"
 
 const parser = newParser:
-  help("A git-based binary manager for linux.")
-  flag("-v", "--version")
-  flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.")
+  help("A git-based binary manager for linux.") ## Help message
+  flag("-v", "--version") ## Create a version flag
+  flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
   run:
-    if opts.version:
+    if opts.version: ## If the version flag was passed
       styledEcho(fgCyan, "Jitter version ", fgYellow, NimblePkgVersion)
       styledEcho("For more information visit ", fgGreen, "https://github.com/sharpcdf/jitter")
 
-  command("install"):
-    help("Installs the given repository, if avaliable.                                     [gh:][user/]repo[@tag]")
-    arg("input")
-    flag("nomake")
+  command("install"): ## Create an install command
+    help("Installs the given repository, if avaliable.                                     [gh:][user/]repo[@tag]") ## Help message
+    arg("input") ## Positional argument called input
     run: 
       opts.input.install(not opts.parentOpts.nomake)
-  command("update"):
-    help("Updates the specified packages, or all packages if none are specified.           user/repo[@tag]")
-    arg("input")
-    flag("nomake")
+  command("update"): ## Create an update command
+    help("Updates the specified packages, or all packages if none are specified.           user/repo[@tag]") ## Help message
+    arg("input") ## Positional argument called input
     run:
       opts.input.update(not opts.parentOpts.nomake)
-  command("remove"):
-    help("Removes the specified package from your system.                                  user/repo[@tag]")
-    arg("input")
+  command("remove"): ## Create a remove command
+    help("Removes the specified package from your system.                                  user/repo[@tag]") ## Help message
+    arg("input") ## Positional arugment called input
     run:
       opts.input.remove()
-  command("search"):
-    help("Searches for repositories that match the given term, returning them if found.    [user/]repo")
-    arg("query")
+  command("search"): ## Create a search command
+    help("Searches for repositories that match the given term, returning them if found.    [user/]repo") ## Help message
+    arg("query") ## Positional argument called query
     run:
       if opts.query.find(AllChars - IdentChars) >= 0: # If it finds more than IdentChars it should be a package and not a repo
         let (ok, pkg) = opts.query.parsePkg()
         if not ok:
           fatal fmt"Couldn't parse package {opts.query}"
 
-        discard pkg.listPkgGhReleases()
+        discard pkg.ghListReleases()
       else:
-        discard opts.query.searchGhRepo
-  command("list"):
-    help("Lists all executables downloaded.")
+        for pkg in opts.query.ghSearch():
+          list &"Github: {pkg.gitFormat}"
+  command("list"): ## Create a list command
+    help("Lists all executables downloaded.") ## Help message
     run:
-      for kind, path in walkDir(baseDir / "bin"):
+      for kind, path in walkDir(binDir):
         if path.hasExecPerms() and path.extractFilename() != "jtr":
           list path
-  command("catalog"):
-    help("Lists all installed packages.")
+  command("catalog"): ## Create a catalog command
+    help("Lists all installed packages.") ## Help message
     run:
       for pkg in getInstalledPkgs():
         list pkg.gitFormat()
