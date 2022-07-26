@@ -32,7 +32,7 @@ done
 
 if [[ $UNINSTALL ]]; then
   if [[ -d "$HOME/.jitter" ]]; then
-    echo "You will delete everything installed by Jitter and Jitter itself."
+    echo "You will delete all installed packages and Jitter itself."
     read -n 1 -p "Do you want to continue? (y/N) "
     echo
     if [[ $REPLY =~ [Yy] ]]; then
@@ -53,7 +53,7 @@ else
     if [[ ! -d "$HOME/.jitter/nerve" ]]; then mkdir $HOME/.jitter/nerve; fi
     if [[ ! -d "$HOME/.jitter/config" ]]; then mkdir $HOME/.jitter/config; fi
 
-    echo "Downloading latest Jitter GitHub release to $HOME/.jitter/bin"
+    echo "Downloading latest Jitter release to $HOME/.jitter/bin"
     wget -o $HOME/.jitter/bin/jtr https://github.com/sharpcdf/jitter/releases/latest/download/jtr
 
     echo "Consider adding $HOME/.jitter/bin to your PATH running the following command: "

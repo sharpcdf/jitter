@@ -41,19 +41,21 @@ proc install(input: string, make = true) =
     #pkg.cbDownload(make)
     discard
   of Undefined:
-    fatal "Unknown source type"
-    success = false
+    pkg.ghDownload(make)
+    #pkg.glDownload(make)
+    #pkg.cbDownload(make)
+    #pkg.shDownload(make)
 
   if success:
     success "Binaries successfully installed"
 
 proc remove(pkg: Package) = 
   for kind, path in walkDir(binDir):
-    if kind == pcLinkToFile and pkg.pkgFormat in path.expandSymlink():
+    if kind == pcLinkToFile and pkg.pkgFormat() in path.expandSymlink():
       info fmt"Removing symlink {path}"
       path.removeFile()
 
-  removeDir(nerveDir / pkg.pkgFormat)
+  removeDir(nerveDir / pkg.pkgFormat())
 
 proc remove(input: string) = 
   let (ok, pkg) = input.parsePkgFormat()
@@ -69,7 +71,7 @@ proc remove(input: string) =
     ask "Which tag would you like to remove?"
     for instPkg in installedPkgs:
       if instPkg.owner == pkg.owner and instPkg.repo == pkg.repo:
-        list instPkg.gitFormat
+        list instPkg.gitFormat()
 
     list "All"
 
@@ -146,7 +148,8 @@ const parser = newParser:
         discard pkg.ghListReleases()
       else:
         for pkg in opts.query.ghSearch():
-          list &"Github: {pkg.gitFormat}"
+          #TODO fix printing empty repos
+          list &"Github: {pkg.gitFormat()}"
   command("list"): ## Create a list command
     help("Lists all executables downloaded.") ## Help message
     run:

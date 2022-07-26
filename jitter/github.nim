@@ -83,7 +83,7 @@ proc downloadRelease(pkg: Package, make = true) =
       downloadUrl = asset["browser_download_url"].getStr()
       downloadPath = name
 
-      success fmt"Archive found: name"
+      success fmt"Archive found: {name}"
       break
 
   if downloadUrl.len == 0:
@@ -112,6 +112,9 @@ proc ghDownload*(pkg: Package, make = true) =
 
 proc ghDownload*(repo: string, make = true) = 
   let pkgs = repo.ghSearch()
+  for pkg in pkgs:
+    if pkg.gitFormat().toLowerAscii() == repo.toLowerAscii():
+      list pkg.gitFormat()
   ask "Which repository would you like to download? (owner/repo)"
   let answer = stdin.readLine().strip()
   let (ok, pkg) = answer.parsePkgFormat()

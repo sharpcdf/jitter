@@ -36,7 +36,10 @@ proc parseInputSource*(input: string): tuple[source: SourceType, output: string]
     result.output = input
 
 proc isCompatibleExt*(file: string): bool =
-  file.splitFile().ext in extensions
+  result = false
+  for ext in extensions:
+    if file.endsWith(ext):
+      return true
 
 proc isCompatibleCPU*(file: string): bool = 
   result = true
@@ -72,10 +75,11 @@ proc parsePkgFormat*(pkg: string): tuple[ok: bool, pkg: Package] =
     result.pkg = package(owner, repo, tag)
 
 proc gitFormat*(pkg: Package): string =
-  if pkg.tag.len > 0:
-    fmt"{pkg.owner}/{pkg.repo}@{pkg.tag}"
-  else:
-    fmt"{pkg.owner}/{pkg.repo}"
+  if pkg.owner.len > 0 and pkg.repo.len > 0:
+    if pkg.tag.len > 0:
+      return fmt"{pkg.owner}/{pkg.repo}@{pkg.tag}"
+    else:
+      return fmt"{pkg.owner}/{pkg.repo}"
 
 proc pkgFormat*(pkg: Package): string = 
-  fmt"{pkg.owner}__{pkg.owner}__{pkg.tag}"
+  return fmt"{pkg.owner}__{pkg.owner}__{pkg.tag}"

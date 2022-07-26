@@ -39,5 +39,5 @@ proc extract*(path, toDir: string, make = true) =
 
     let perms = getFilePermissions(path)
     if (fpGroupExec in perms or fpOthersExec in perms or fpUserExec in perms) and path.splitFile.ext == "":
-      path.createSymlink(binDir & path.extractFilename())
+      path.createSymlink(binDir / path.extractFilename())
       success fmt"Created symlink {path.extractFilename()}"
