@@ -73,7 +73,7 @@ proc parsePkgFormat*(pkg: string): tuple[ok: bool, pkg: Package] =
     if owner.len > 0 and repo.len > 0 and tag.len == 0: # No tag
       success = true
     else:
-      (success, owner, repo, tag) = scanTuple(pkg, "${validIdent()}__${validIdent()}__$+$.", string, string)
+      (success, owner, repo, tag) = scanTuple(pkg, "${validIdent()}::${validIdent()}::$+$.", string, string)
 
   if success:
     result.ok = success
@@ -86,5 +86,5 @@ proc gitFormat*(pkg: Package): string =
     else:
       return fmt"{pkg.owner}/{pkg.repo}"
 
-proc pkgFormat*(pkg: Package): string = ## FIXME __ are valid characthers in github identifiers
-  return fmt"{pkg.owner}__{pkg.owner}__{pkg.tag}"
+proc pkgFormat*(pkg: Package): string = 
+  return fmt"{pkg.owner}::{pkg.owner}::{pkg.tag}"
