@@ -148,7 +148,6 @@ const parser = newParser:
         discard pkg.ghListReleases()
       else:
         for pkg in opts.query.ghSearch():
-          #TODO fix printing empty repos
           list &"Github: {pkg.gitFormat()}"
   command("list"): ## Create a list command
     help("Lists all executables downloaded.") ## Help message

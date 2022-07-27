@@ -57,18 +57,23 @@ proc hasExecPerms*(file: string): bool =
   let perms = getFilePermissions(file)
   return fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms
 
+proc validIdent(input: string, strVal: var string, start: int, validChars = IdentChars + {'.', '-'}): int =
+  while start + result < input.len and input[start + result] in validChars:
+    strVal.add(input[start + result])
+    inc result
+
 proc parsePkgFormat*(pkg: string): tuple[ok: bool, pkg: Package] = 
   ## Parses packages in two formats:
   ## - `owner__repo__tag`
   ## - `owner/repo[@tag]` Tag is optional
 
-  var (success, owner, repo, tag) = scanTuple(pkg, "$w/$w@$+$.")
+  var (success, owner, repo, tag) = scanTuple(pkg, "${validIdent()}/${validIdent()}@$+$.", string, string)
 
   if not success:
     if owner.len > 0 and repo.len > 0 and tag.len == 0: # No tag
       success = true
     else:
-      (success, owner, repo, tag) = scanTuple(pkg, "$w__$w__$+$.")
+      (success, owner, repo, tag) = scanTuple(pkg, "${validIdent()}__${validIdent()}__$+$.", string, string)
 
   if success:
     result.ok = success
@@ -81,5 +86,5 @@ proc gitFormat*(pkg: Package): string =
     else:
       return fmt"{pkg.owner}/{pkg.repo}"
 
-proc pkgFormat*(pkg: Package): string = 
+proc pkgFormat*(pkg: Package): string = ## FIXME __ are valid characthers in github identifiers
   return fmt"{pkg.owner}__{pkg.owner}__{pkg.tag}"
