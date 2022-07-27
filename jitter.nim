@@ -113,7 +113,7 @@ proc update(input: string, make = true) =
   success fmt"Successfully updated {pkg}"
 
 const parser = newParser:
-  help("A git-based binary manager for linux.") ## Help message
+  help("A git-based binary manager for Linux") ## Help message
   flag("-v", "--version") ## Create a version flag
   flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
   run:
@@ -154,7 +154,7 @@ const parser = newParser:
     run:
       for kind, path in walkDir(binDir):
         if path.hasExecPerms() and path.extractFilename() != "jtr":
-          list path
+          list path.extractFilename()
   command("catalog"): ## Create a catalog command
     help("Lists all installed packages.") ## Help message
     run:
