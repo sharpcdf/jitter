@@ -54,8 +54,10 @@ else
     if [[ ! -d "$HOME/.jitter/config" ]]; then mkdir $HOME/.jitter/config; fi
 
     echo "Downloading latest Jitter release to $HOME/.jitter/bin"
-    wget -o $HOME/.jitter/bin/jtr https://github.com/sharpcdf/jitter/releases/latest/download/jtr
-
+    wget -o $HOME/.jitter/bin/jtr.tar.gz https://github.com/sharpcdf/jitter/releases/latest/download/jtr.tar.gz
+    tar -xfv $HOME/.jitter/bin/jtr.tar.gz
+    chmod +x $HOME/.jitter/bin/jtr
+    rm -rf $HOME/.jitter/bin/jtr.tar.gz
     echo "Consider adding $HOME/.jitter/bin to your PATH running the following command: "
     echo "echo 'export PATH=\$PATH:$HOME/.jitter/bin' >> $HOME/.bashrc"
     exit 0
