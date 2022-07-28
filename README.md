@@ -1,8 +1,8 @@
 # Jitter
 A git-based binary manager for linux written in Nim.
 
-## How it works?
-Jitter searches through GitHub for releases with `.tar.gz`, `.tgz` or `.zip` assets. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
+## How it works
+Jitter searches through GitHub for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
 
 ## Installing
 Using the `install.sh` script:
