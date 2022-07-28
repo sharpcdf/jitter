@@ -1,1 +1,0 @@
-#TODO add json config file in .jitter/config that lets you customize bin and github token

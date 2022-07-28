@@ -1,30 +1,48 @@
 # Jitter
-A git-based binary manager for linux
+A git-based binary manager for linux written in Nim.
 
-## What is it?
-Jitter is a binary manager for linux. It searches github for executables that are avaliable to download. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
+## How it works?
+Jitter searches through GitHub for releases with `.tar.gz`, `.tgz` or `.zip` assets. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
 
+## Installing
+Using the `install.sh` script:
+```
+wget -q -O - https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true | bash
+```
+Through nimble:
+```
+nimble install https://github.com/sharpcdf/jitter
+```
 
 ## Building
-Note: Building requires the Nim Compiler >= 1.6.6 and Zippy, to get Zippy and other future dependencies you can run `nim setup`.
-To build jitter's installer, clone this repository, run `nim installer`. After building, run `./bin/mug install` to install jitter.
-To develop jitter, git clone the repository and run `nim dinstaller` or `nim debug` after making changes.
+Clone the repository and run `nimble build`.
+(You need to have nim and nimble installed).
+```
+git clone https://github.com/sharpcdf/jitter
+cd jitter
+nimble build
+```
 
-Note: Both the `debug` and `dinstaller` tasks purely show compiler information at compile time, and otherwise do the same thing as `release` and `installer`
+## Usage
+```
+$ jtr
+A git-based binary manager for linux.
 
-## Structure
-Jitter's source code is separated into two directories. The `mug` directory holds the source code for jitter's installer/updater, mug, while the `src` directory holds the source code for jitter itself.
+Usage:
+   [options] COMMAND
 
-## Notes
-- Jitter is still in development, and there will most likely be bugs. If you encounter an unkown bug, please open an issue :)
-- While you are able to download multiple versions of a repository, it will most likely cause conflicts. If this happens, you can simply remove the unneeded package from Jitter.
-- Jitter commands are not fully documented yet, but luckily you can look in `jitter.nim` and see the different commands and subcommands that are usable.
-- As of right now, Jitter only supports github repositories. New sources may be added with future releases.
-- All listed flags in `jtr help` currently do not work.
-- You can currently update jitter to a newer version by running `jitter update this` and then running `mug upgrade` afterwards. An easier way to update is being worked on.
+Commands:
 
-## Quick Start
-Download the Jitter installer from the releases, and then after navigating to the download directory in your terminal run `./mug install`. This will create all needed directories for downloading and using executables. You can then run `jtr help` after adding it to your path.
+  install          Installs the binaries of the given repository, if avaliable.                         [gh:][user/]repo[@tag]
+  update           Updates the specified binaries, or all binaries if none are specified.               user/repo[@tag]
+  remove           Removes the specified binaries from your system.                                     user/repo[@tag]
+  search           Searches for binaries that match the given repositories, returning them if found.    [user/]repo
+  list             Lists all executables downloaded.
+  catalog          Lists all installed packages.
+
+Options:
+  -h, --help
+  -v, --version
 
 ### Example Usage
 1. `jtr install gh:VSCodium/vscodium` - installs repository VSCodium/vscodium from github.
