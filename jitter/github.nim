@@ -66,7 +66,6 @@ proc downloadRelease(pkg: Package, make = true) =
 
   let data = content.parseJson()
   let pkg = package(pkg.owner, pkg.repo, data["tag_name"].getStr())
-
   #ditto
   if dirExists(nerveDir / pkg.pkgFormat):
     fatal fmt"Package {pkg.gitFormat} already exists."
@@ -84,17 +83,24 @@ proc downloadRelease(pkg: Package, make = true) =
       downloadPath = name
 
       success fmt"Archive found: {name}"
-      break
+      ask "Are you sure you want to download this archive? There might be other compatible assets. [y/N]"
+      var answer = readLine(stdin)
+      if answer.toLowerAscii() == "n" or answer.toLowerAscii() == "no":
+        continue
+      elif answer.toLowerAscii() == "y" or answer.toLowerAscii() == "yes" or answer == "":
+        break
+      else:
+        fatal "Invalid answer, exiting"
 
   if downloadUrl.len == 0:
-    fatal fmt"No archives found for {pkg.gitFormat}"
+    fatal fmt"No archives found for {pkg.gitFormat()}"
       
   info fmt"Downloading {downloadUrl}"
 
   client.downloadFile(downloadUrl, nerveDir / downloadPath)
-  success fmt"Downloaded {pkg.gitFormat}"
+  success fmt"Downloaded {pkg.gitFormat()}"
 
-  extract(nerveDir / downloadPath, pkg.pkgFormat, make)
+  pkg.extract(nerveDir / downloadPath, pkg.pkgFormat(), make)
 
 proc ghDownload*(pkg: Package, make = true) =
     # If it has a username, run the code, otherwise searches for the closest matching one

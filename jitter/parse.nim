@@ -13,7 +13,7 @@ type
 
 const
   # Supported
-  extensions = [".tar.gz", ".tgz", ".zip"]
+  extensions = [".tar.gz", ".tgz", ".zip", ".AppImage"]
   # Not supported
   unsupportedCPU = ["arm32", "arm64", "-arm", "arm-"]
   unsupportedOS = ["darwin", "windows", "osx", "macos", "win"]
@@ -87,4 +87,4 @@ proc gitFormat*(pkg: Package): string =
       return fmt"{pkg.owner}/{pkg.repo}"
 
 proc pkgFormat*(pkg: Package): string = 
-  return fmt"{pkg.owner}::{pkg.owner}::{pkg.tag}"
+  return fmt"{pkg.owner.toLowerAscii()}::{pkg.repo.toLowerAscii()}::{pkg.tag}"

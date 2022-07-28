@@ -3,19 +3,23 @@ import std/[strformat, strutils, osproc, os]
 import zippy/tarballs
 import zippy/ziparchives
 
-import log
+import log, parse
 
 let baseDir = getHomeDir() & ".jitter/"
 let nerveDir = baseDir / "nerve"
 let binDir = baseDir / "bin"
 
-proc extract*(path, toDir: string, make = true) =
+proc extract*(pkg: Package, path, toDir: string, make = true) =
   ## Extracts `path` inside `toDir` directory.
 
   info "Extracting files"
   try:
     if path.splitFile().ext == ".zip":
       ziparchives.extractAll(path, nerveDir / toDir)
+    elif path.splitFile().ext == ".AppImage":
+      createDir(nerveDir / toDir)
+      path.setFilePermissions({fpUserExec, fpUserRead, fpUserWrite, fpOthersExec, fpOthersRead, fpOthersWrite, fpGroupExec})
+      moveFile(path, nerveDir / toDir / path.extractFilename())
     else:
       tarballs.extractAll(path, nerveDir / toDir)
   except ZippyError:
@@ -34,10 +38,8 @@ proc extract*(path, toDir: string, make = true) =
   info "Adding executables to bin"
 
   #Creates symlinks for executables and adds them to the bin
-  for kind, path in walkDir(nerveDir / toDir):
-    if kind == pcDir: continue
-
-    let perms = getFilePermissions(path)
-    if (fpGroupExec in perms or fpOthersExec in perms or fpUserExec in perms) and path.splitFile.ext == "":
-      path.createSymlink(binDir / path.extractFilename())
-      success fmt"Created symlink {path.extractFilename()}"
+  for file in walkDirRec(nerveDir / toDir):
+    if file.hasExecPerms() and not symlinkExists(binDir / file.splitFile().name):
+      if file.splitFile().ext == "" or file.splitFile().ext == ".AppImage":
+        file.createSymlink(binDir / pkg.repo)
+        success fmt"Created symlink {pkg.repo}"

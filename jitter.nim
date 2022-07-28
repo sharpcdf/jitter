@@ -55,7 +55,7 @@ proc remove(pkg: Package) =
       info fmt"Removing symlink {path}"
       path.removeFile()
 
-  removeDir(nerveDir / pkg.pkgFormat())
+  removeDir(nerveDir / pkg.pkgFormat().toLowerAscii())
 
 proc remove(input: string) = 
   let (ok, pkg) = input.parsePkgFormat()
@@ -71,7 +71,7 @@ proc remove(input: string) =
     ask "Which tag would you like to remove?"
     for instPkg in installedPkgs:
       if instPkg.owner == pkg.owner and instPkg.repo == pkg.repo:
-        list instPkg.gitFormat()
+        list instPkg.tag
 
     list "All"
 
@@ -84,13 +84,13 @@ proc remove(input: string) =
     else:
       var valid = false
       for instPkg in installedPkgs:
-        if instPkg.owner == pkg.owner and instPkg.repo == pkg.repo and instPkg.tag == answer:
+        if instPkg.tag == answer:
           valid = true
 
       if not valid:
         fatal "Invalid tag"
       else:
-        package(pkg.owner, pkg.repo, answer).remove()
+        package(pkg.owner, pkg.repo, pkg.tag).remove()
   else:
     pkg.remove()
 
@@ -135,7 +135,7 @@ const parser = newParser:
     help("Removes the specified package from your system.                                  user/repo[@tag]") ## Help message
     arg("input") ## Positional arugment called input
     run:
-      opts.input.remove()
+      opts.input.toLowerAscii().remove()
   command("search"): ## Create a search command
     help("Searches for repositories that match the given term, returning them if found.    [user/]repo") ## Help message
     arg("query") ## Positional argument called query
