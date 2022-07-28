@@ -13,7 +13,8 @@ Through nimble:
 ```
 nimble install https://github.com/sharpcdf/jitter
 ```
-
+## Notes
+- At the moment, jitter is being developed and you need at least version 0.3.0 to use the install script, please be patient until it releases :)
 ## Building
 Clone the repository and run `nimble build`.
 (You need to have nim and nimble installed).
