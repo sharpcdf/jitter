@@ -8,7 +8,7 @@ var nimble = getHomeDir() & ".nimble/pkgs"
 
 switch("NimblePath", nimble)
 switch("define", "version:" & version)
-
+switch("define", "ssl")
 task installer, "Builds the mug installer":
     echo "Setting args"
     switch("out", "bin/mug")
@@ -35,7 +35,6 @@ task debug, "Builds the debug version of jitter":
     echo "Setting arguments"
     switch("verbosity", "3")
     switch("define", "debug")
-    switch("define", "ssl")
     switch("out", "bin/jtr")
     switch("opt", "speed")
     echo "Done\nCompiling.."
@@ -45,7 +44,6 @@ task release, "Builds the release version of jitter":
     echo "Setting arguments"
     switch("verbosity", "0")
     switch("define", "release")
-    switch("define", "ssl")
     switch("out", "bin/jtr")
     switch("opt", "size")
     switch("hints", "off")
@@ -54,3 +52,4 @@ task release, "Builds the release version of jitter":
 
 task setup, "Installs required nimble libraries":
     exec("nimble install zippy")
+    exec("nimble install argpase")
