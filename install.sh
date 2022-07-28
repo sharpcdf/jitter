@@ -55,7 +55,7 @@ else
 
     echo "Downloading latest Jitter release to $HOME/.jitter/bin"
     wget -o $HOME/.jitter/bin/jtr.tar.gz https://github.com/sharpcdf/jitter/releases/latest/download/jtr.tar.gz
-    tar -xfv $HOME/.jitter/bin/jtr.tar.gz
+    tar -xf $HOME/.jitter/bin/jtr.tar.gz
     chmod +x $HOME/.jitter/bin/jtr
     rm -rf $HOME/.jitter/bin/jtr.tar.gz
     echo "Consider adding $HOME/.jitter/bin to your PATH running the following command: "
