@@ -1,11 +1,11 @@
 # Jitter
-A git-based binary manager for linux written in Nim.
+A git-based binary manager for Linux written in Nim.
 
 ## How it works
 Jitter searches through GitHub for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
 
 ## Installing
-Using the `install.sh` script:
+Using the `install.sh` script (recommended):
 ```
 wget -q -O - https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true | bash
 ```
@@ -14,7 +14,9 @@ Through nimble:
 nimble install https://github.com/sharpcdf/jitter
 ```
 ## Notes
-- At the moment, jitter is being developed and you need at least version 0.3.0 to use the install script, please be patient until it releases :)
+- At the moment, jitter is being developed and you need at least version 0.3.0 to use the install script. Previous releases relied on an installer called Mug
+- You may encounter bugs as this project is still in development, please create an issue if you encounter anything wrong with jitter :)
+
 ## Building
 Clone the repository and run `nimble build`.
 (You need to have nim and nimble installed).
@@ -44,6 +46,7 @@ Commands:
 Options:
   -h, --help
   -v, --version
+```
 
 ### Example Usage
 1. `jtr install gh:VSCodium/vscodium` - installs repository VSCodium/vscodium from github.
