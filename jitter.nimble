@@ -1,10 +1,10 @@
 # Package
 
-version          = "0.3.0"
-author           = "sharpcdf"
-description      = "A git-based binary manager for linux."
-license          = "MIT"
-bin              = "."
+version                = "0.3.0"
+author                 = "sharpcdf"
+description            = "A git-based binary manager for linux."
+license                = "MIT"
+namedBin["jitter"]     = @["jtr"]
 # Dependencies
 
 requires "nim >= 1.6.5"
