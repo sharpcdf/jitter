@@ -61,4 +61,4 @@ Options:
 10. `jtr update (this|jitter|jtr)` - updates jitter to the latest release
 11. `jtr update all` - updates all installed packages
 
-Note: repositories are case insensitive, and all AppImages installed are converted to lowercase. `jtr install VSCodium/vscodium` is equivalent to `jtr install vscodium/vscodium`.
+Note: repositories are case insensitive, and all AppImage file names are converted to the name of the repository. `jtr install VSCodium/vscodium` is equivalent to `jtr install vscodium/vscodium`.
