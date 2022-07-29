@@ -7,7 +7,7 @@ Jitter searches through GitHub for releases with `.tar.gz`, `.tgz`, `.zip` or `.
 ## Installing
 Using the `install.sh` script (recommended):
 ```
-wget -q https://raw.githubusercontent.com/sharpcdf/jitter/main/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/sharpcdf/jitter/main/install.sh | bash
 ```
 Through nimble:
 ```
