@@ -54,7 +54,7 @@ else
     if [[ ! -d "$HOME/.jitter/config" ]]; then mkdir $HOME/.jitter/config; fi
 
     echo "Downloading latest Jitter release to $HOME/.jitter/bin"
-    wget -o $HOME/.jitter/bin/jtr.tar.gz https://github.com/sharpcdf/jitter/releases/latest/download/jtr.tar.gz
+    wget -O $HOME/.jitter/bin/jtr.tar.gz https://github.com/sharpcdf/jitter/releases/latest/download/jtr.tar.gz
     tar -xf $HOME/.jitter/bin/jtr.tar.gz
     chmod +x $HOME/.jitter/bin/jtr
     rm -rf $HOME/.jitter/bin/jtr.tar.gz
