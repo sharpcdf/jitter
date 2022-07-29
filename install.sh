@@ -58,7 +58,7 @@ else
     echo "Extracting jtr"
     tar -xf $HOME/.jitter/bin/jtr.tar.gz
     echo "Adding executable permissions"
-    chmod +x $HOME/.jitter/bin/jtr
+    #chmod +x $HOME/.jitter/bin/jtr
     echo "Cleaning up"
     rm -rf $HOME/.jitter/bin/jtr.tar.gz
     echo "Consider adding $HOME/.jitter/bin to your PATH running the following command: "
