@@ -60,15 +60,15 @@ proc downloadRelease(pkg: Package, make = true) =
   try:
     content = client.getContent(url)
   except HttpRequestError:
-    fatal &"Failed to download {pkg.gitFormat}."
+    fatal &"Failed to download {pkg.gitFormat()}."
   finally:
     client.close()
 
   let data = content.parseJson()
   let pkg = package(pkg.owner, pkg.repo, data["tag_name"].getStr())
   #ditto
-  if dirExists(nerveDir / pkg.pkgFormat):
-    fatal fmt"Package {pkg.gitFormat} already exists."
+  if dirExists(nerveDir / pkg.pkgFormat()):
+    fatal fmt"Package {pkg.gitFormat()} already exists."
 
   info "Looking for compatible archives"
   #TODO make download specific to cpu type

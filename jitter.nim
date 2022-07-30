@@ -55,6 +55,7 @@ proc remove(pkg: Package) =
       info fmt"Removing symlink {path}"
       path.removeFile()
 
+  echo pkg.pkgFormat().toLowerAscii()
   removeDir(nerveDir / pkg.pkgFormat().toLowerAscii())
 
 proc remove(input: string) = 
@@ -76,8 +77,8 @@ proc remove(input: string) =
     list "All"
 
     let answer = stdin.readLine().strip()
-
-    if answer.toLowerAscii() == "all":
+    case answer.toLowerAscii():
+    of "all":
       for instPkg in installedPkgs:
         if instPkg.owner == pkg.owner and instPkg.repo == pkg.repo:
           instPkg.remove()
@@ -86,11 +87,10 @@ proc remove(input: string) =
       for instPkg in installedPkgs:
         if instPkg.tag == answer:
           valid = true
-
       if not valid:
         fatal "Invalid tag"
       else:
-        package(pkg.owner, pkg.repo, pkg.tag).remove()
+        package(pkg.owner, pkg.repo, answer).remove()
   else:
     pkg.remove()
 
@@ -127,7 +127,7 @@ const parser = newParser:
     run: 
       opts.input.install(not opts.parentOpts.nomake)
   command("update"): ## Create an update command
-    help("Updates the specified packages, or all packages if Undefined are specified.           user/repo[@tag]") ## Help message
+    help("Updates the specified packages, or all packages if none are specified.           user/repo[@tag]") ## Help message
     arg("input") ## Positional argument called input
     run:
       opts.input.update(not opts.parentOpts.nomake)
@@ -165,4 +165,8 @@ when isMainModule:
   if commandLineParams().len == 0:
     parser.run(@["--help"])
   else:
-    parser.run()
+    try:
+      parser.run()
+    except:
+      error "Error parsing arguments. Make sure to dot your Ts and cross your Is and try again. Oh, wait."
+      raise
