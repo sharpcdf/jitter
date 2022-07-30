@@ -1,8 +1,8 @@
 # Jitter
-A git-based binary manager for Linux written in Nim.
+A repository-based binary manager for Linux
 
 ## How it works
-Jitter searches through GitHub for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, jitter does not require a brewfile or nixfile in order to recognize the project.
+Jitter searches through GitHub(and hopefully soon more sources) for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, Jitter does not require a brewfile or nixfile in order to recognize the project.
 
 ## Installing
 Using the `install.sh` script (recommended):
@@ -18,9 +18,10 @@ Through Nimble:
 nimble install https://github.com/sharpcdf/jitter
 ```
 ## Notes
-- Right now Jitter only supports GitHub.
-- At the moment, Jitter is being developed and you need at least version 0.3.0 to use the install script. Previous releases relied on an installer called Mug
-- You may encounter bugs as this project is still in development, please create an issue if you encounter anything wrong with Jitter :)
+- Right now, Jitter only supports GitHub as a download source.
+- At the moment, Jitter is being developed and you need at least version 0.3.0 to use the install script. Previous releases relied on an installer called Mug.
+- You may encounter bugs as this project is still in development, please create an issue if you encounter anything wrong with jitter :)
+- With the release of Jitter 0.3.0, many things broke and are being worked on. If you find a bug with a command or flag, please tell us so we can fix it
 
 ## Building
 Clone the repository and run `nimble build`.
