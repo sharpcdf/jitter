@@ -20,8 +20,24 @@ proc getInstalledPkgs*(): seq[Package] =
     if kind == pcDir and (let (ok, pkg) = path.splitPath.tail.parsePkgFormat(); ok):
       result.add(pkg)
 
+proc search(query: string) = 
+  if '/' in query: 
+    let (ok, pkg) = query.parsePkgFormat()
+    if not ok:
+      fatal fmt"Couldn't parse package {query}"
+
+    discard pkg.ghListReleases()
+  else:
+    for pkg in query.ghSearch():
+      list &"Github: {pkg.gitFormat()}"
+
 proc install(input: string, make = true) = 
   let (srctype, input) = input.parseInputSource()
+  if '/' notin input:
+    info fmt"Searching for {input}"
+    input.search()
+    return
+
   let (ok, pkg) = input.parsePkgFormat()
 
   if not ok:
@@ -112,6 +128,15 @@ proc update(input: string, make = true) =
 
   success fmt"Successfully updated {pkg}"
 
+proc list() = 
+  for kind, path in walkDir(binDir):
+    if path.hasExecPerms() and path.extractFilename() != "jtr":
+      list path.extractFilename()
+
+proc catalog() = 
+  for pkg in getInstalledPkgs():
+    list pkg.gitFormat()
+
 const parser = newParser:
   help("A git-based binary manager for Linux") ## Help message
   flag("-v", "--version") ## Create a version flag
@@ -122,7 +147,7 @@ const parser = newParser:
       styledEcho("For more information visit ", fgGreen, "https://github.com/sharpcdf/jitter")
 
   command("install"): ## Create an install command
-    help("Installs the given repository, if avaliable.                                     [gh:][user/]repo[@tag]") ## Help message
+    help("Installs the given repository, if avaliable.                                          [gh:][user/]repo[@tag]") ## Help message
     arg("input") ## Positional argument called input
     run: 
       opts.input.install(not opts.parentOpts.nomake)
@@ -132,35 +157,23 @@ const parser = newParser:
     run:
       opts.input.update(not opts.parentOpts.nomake)
   command("remove"): ## Create a remove command
-    help("Removes the specified package from your system.                                  user/repo[@tag]") ## Help message
+    help("Removes the specified package from your system.                                       user/repo[@tag]") ## Help message
     arg("input") ## Positional arugment called input
     run:
       opts.input.toLowerAscii().remove()
   command("search"): ## Create a search command
-    help("Searches for repositories that match the given term, returning them if found.    [user/]repo") ## Help message
+    help("Searches for repositories that match the given term, returning them if found.         [user/]repo") ## Help message
     arg("query") ## Positional argument called query
     run:
-      if opts.query.find(AllChars - IdentChars) >= 0: # If it finds more than IdentChars it should be a package and not a repo
-        let (ok, pkg) = opts.query.parsePkgFormat()
-        if not ok:
-          fatal fmt"Couldn't parse package {opts.query}"
-
-        discard pkg.ghListReleases()
-      else:
-        for pkg in opts.query.ghSearch():
-          list &"Github: {pkg.gitFormat()}"
+      opts.query.search()
   command("list"): ## Create a list command
     help("Lists all executables downloaded.") ## Help message
     run:
-      for kind, path in walkDir(binDir):
-        if path.hasExecPerms() and path.extractFilename() != "jtr":
-          list path.extractFilename()
+      list()
   command("catalog"): ## Create a catalog command
     help("Lists all installed packages.") ## Help message
     run:
-      for pkg in getInstalledPkgs():
-        list pkg.gitFormat()
-
+      catalog()
 when isMainModule:
   if commandLineParams().len == 0:
     parser.run(@["--help"])
