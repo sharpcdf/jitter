@@ -7,20 +7,25 @@ Jitter searches through GitHub(and hopefully soon more sources) for releases wit
 ## Installing
 Using the `install.sh` script (recommended):
 ```
-wget -qO- https://raw.githubusercontent.com/sharpcdf/jitter/main/install.sh | bash
+wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true  | bash
 ```
-Through nimble:
+To pass flags such as `--force` or `--uninstall` use:
+```
+wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true  | bash -s -- --flag
+```
+Through Nimble:
 ```
 nimble install https://github.com/sharpcdf/jitter
 ```
 ## Notes
+- Right now, Jitter only supports GitHub as a download source.
 - At the moment, Jitter is being developed and you need at least version 0.3.0 to use the install script. Previous releases relied on an installer called Mug.
 - You may encounter bugs as this project is still in development, please create an issue if you encounter anything wrong with jitter :)
 - With the release of Jitter 0.3.0, many things broke and are being worked on. If you find a bug with a command or flag, please tell us so we can fix it
 
 ## Building
 Clone the repository and run `nimble build`.
-(You need to have nim and nimble installed).
+(You need to have Nim and Nimble installed).
 ```
 git clone https://github.com/sharpcdf/jitter
 cd jitter

@@ -33,13 +33,9 @@ done
 if [[ $UNINSTALL ]]; then
   if [[ -d "$HOME/.jitter" ]]; then
     echo "You will delete all installed packages and Jitter itself."
-    read -n 1 -p "Do you want to continue? (y/N) "
-    echo
-    if [[ $REPLY =~ [Yy] ]]; then
-      rm -rf "$HOME/.jitter"
-      echo "Successfully uninstalled"
-      exit 0
-    fi
+    rm -rf "$HOME/.jitter"
+    echo "Successfully uninstalled"
+    exit 0
   else
     echo "Jitter is not installed"
     exit 1
