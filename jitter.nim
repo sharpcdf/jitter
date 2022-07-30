@@ -179,7 +179,10 @@ when isMainModule:
     parser.run(@["--help"])
   else:
     try:
-      parser.run()
+      if dirExists(getHomeDir() / ".jitter"):
+        parser.run()
+      else:
+        fatal "Jitter is not installed, check https://github.com/sharpcdf/jitter to install it"
     except ShortCircuit:
       error "Error parsing arguments. Make sure to dot your Ts and cross your Is and try again. Oh, wait."
       raise
