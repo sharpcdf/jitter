@@ -167,6 +167,6 @@ when isMainModule:
   else:
     try:
       parser.run()
-    except:
+    except ShortCircuit:
       error "Error parsing arguments. Make sure to dot your Ts and cross your Is and try again. Oh, wait."
       raise
