@@ -31,15 +31,19 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
   #if the --no-make flag isnt passed than this happens
   if make:
     for path in walkDirRec(nerveDir / toDir):
-      if path.extractFilename().toLowerAscii() == "makefile":
+      if path.extractFilename() .toLowerAscii() == "makefile":
         if execCmdEx(fmt"make -C {path.splitFile.dir}").exitCode != 0:
-          fatal fmt"Error: failed to make {path}"
+          error fmt"Error: failed to make {path}"
 
   info "Adding executables to bin"
 
   #Creates symlinks for executables and adds them to the bin
   for file in walkDirRec(nerveDir / toDir):
     if file.hasExecPerms() and not symlinkExists(binDir / file.splitFile().name):
-      if file.splitFile().ext == "" or file.splitFile().ext == ".AppImage":
+      case file.splitFile().ext:
+      of "":
+        file.createSymlink(binDir / file.splitFile().name)
+        success fmt"Created symlink {file.splitFile().name}"
+      of ".AppImage":
         file.createSymlink(binDir / pkg.repo)
         success fmt"Created symlink {pkg.repo}"

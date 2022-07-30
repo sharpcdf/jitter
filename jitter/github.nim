@@ -32,7 +32,7 @@ proc ghListReleases*(pkg: Package): seq[string] =
     list release["tag_name"].getStr()
     result.add(release["tag_name"].getStr())
 
-proc ghSearch*(repo: string): seq[Package] = 
+proc ghSearch*(repo: string, exactmatch: bool = false): seq[Package] = 
   let url = "https://api.github.com/search/repositories?" & encodeQuery({"q": repo})
   let client = newHttpClient()
   var content: string
@@ -44,8 +44,14 @@ proc ghSearch*(repo: string): seq[Package] =
   finally:
     client.close()
 
-  for repo in content.parseJson()["items"]:
-    result.add(parsePkgFormat(repo["full_name"].getStr()).pkg)
+  for r in content.parseJson()["items"]:
+    if not exactmatch:
+      result.add(parsePkgFormat(r["full_name"].getStr()).pkg)
+    else:
+      if r["name"].getStr().toLowerAscii() == repo.toLowerAscii():
+        result.add(parsePkgFormat(r["full_name"].getStr()).pkg)
+      else:
+        continue
 
 proc downloadRelease(pkg: Package, make = true) =
   let url = 
@@ -83,8 +89,8 @@ proc downloadRelease(pkg: Package, make = true) =
       downloadPath = name
 
       success fmt"Archive found: {name}"
-      ask "Are you sure you want to download this archive? There might be other compatible assets. [y/N]"
-      var answer = readLine(stdin)
+      ask "Are you sure you want to download this archive? There might be other compatible assets. [Y/n]"
+      var answer = stdin.readLine().strip()
       if answer.toLowerAscii() == "n" or answer.toLowerAscii() == "no":
         continue
       elif answer.toLowerAscii() == "y" or answer.toLowerAscii() == "yes" or answer == "":
@@ -116,16 +122,18 @@ proc ghDownload*(pkg: Package, make = true) =
 
     #   package(pkg.owner, pkg.repo, answer).downloadRelease()
 
+#Downloads repo without owner
 proc ghDownload*(repo: string, make = true) = 
-  let pkgs = repo.ghSearch()
+  let pkgs = repo.ghSearch(true)
+  echo pkgs
   for pkg in pkgs:
     if pkg.gitFormat().toLowerAscii() == repo.toLowerAscii():
       list pkg.gitFormat()
-  ask "Which repository would you like to download? (owner/repo)"
+  ask "Which repository would you like to download? (owner/repo)" #TODO fix this to where it was before
   let answer = stdin.readLine().strip()
   let (ok, pkg) = answer.parsePkgFormat()
 
   if not ok:
-    fatal "Couldn't parse package {answer}"
+    fatal fmt"Couldn't parse package {answer}"
 
   pkg.ghDownload()

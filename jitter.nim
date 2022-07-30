@@ -35,7 +35,7 @@ proc install(input: string, make = true) =
   let (srctype, input) = input.parseInputSource()
   if '/' notin input:
     info fmt"Searching for {input}"
-    input.search()
+    input.ghDownload(make)
     return
 
   let (ok, pkg) = input.parsePkgFormat()
