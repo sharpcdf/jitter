@@ -9,7 +9,7 @@ import jitter/[github, parse, log]
 
 const version {.strdefine.} = "undefined"
 when not defined(version):
-  raise newException(ValueError, "Version has to be specified -d:version=x.y.z")
+  raise newException(ValueError, "Version has to be specified, -d:version=x.y.z")
 
 let baseDir = getHomeDir() / ".jitter"
 let nerveDir = baseDir / "nerve"
@@ -40,6 +40,28 @@ proc setup() =
   createDir(getHomeDir() / ".jitter/nerve")
   createDir(getHomeDir() / ".jitter/config")
   success "Done!"
+  ask &"Do you want to add {getAppDir()} to your path? [y/N]"
+  let answer = stdin.readLine()
+  case answer.toLowerAscii():
+  of "y", "yes":
+    if &"export PATH=$PATH:{getAppDir()}" in readFile(getHomeDir() / ".bashrc"):
+      error "Jitter is already in your .bashrc file!"
+    else:
+      let f = open(getHomeDir() / ".bashrc", fmAppend)
+      f.writeLine(&"export PATH=$PATH:{getAppDir()}")
+      f.close()
+      success "Added to bash path!"
+    if getEnv("SHELL") == "/usr/bin/fish":
+      info "Adding jitter to fish user paths via config.fish file"
+      if &"set -U fish_user_paths $fish_user_paths {getAppDir()}" in readFile(&"{getHomeDir()}.config/fish/config.fish"):
+        error "Jitter is already in your config.fish file!"
+      else:
+        let f = open(getHomeDir() / ".config/fish/config.fish", fmAppend)
+        f.writeLine(&"set -U fish_user_paths $fish_user_paths {getAppDir()}")
+        f.close()
+        success "Added to fish path!"
+  else:
+    info &"Consider running 'echo \"export PATH=$PATH:{getAppDir()}\" >> {getHomeDir()}.bashrc' to add it to your bash path."
   
 proc install(input: string, make = true) = 
   let (srctype, input) = input.parseInputSource()
@@ -199,7 +221,14 @@ when isMainModule:
       if dirExists(getHomeDir() / ".jitter"):
         parser.run()
       else:
-        fatal "Jitter is not installed, check https://github.com/sharpcdf/jitter to install it"
-    except ShortCircuit:
+        error "Jitter is not installed"
+        ask "Do you want to install jitter? [Y/n]"
+        let answer = stdin.readLine()
+        case answer.toLowerAscii():
+        of "n", "no":
+          info "Check https://github.com/sharpcdf/jitter for more information on installing jitter."
+        else:
+          parser.run(@["setup"])
+          
+    except ShortCircuit, UsageError:
       error "Error parsing arguments. Make sure to dot your Ts and cross your Is and try again. Oh, wait."
-      raise
