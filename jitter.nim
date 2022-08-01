@@ -71,7 +71,6 @@ proc remove(pkg: Package) =
       info fmt"Removing symlink {path}"
       path.removeFile()
 
-  echo pkg.pkgFormat().toLowerAscii()
   removeDir(nerveDir / pkg.pkgFormat().toLowerAscii())
 
 proc remove(input: string) = 

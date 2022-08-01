@@ -91,12 +91,11 @@ proc downloadRelease(pkg: Package, make = true) =
       success fmt"Archive found: {name}"
       ask "Are you sure you want to download this archive? There might be other compatible assets. [Y/n]"
       var answer = stdin.readLine().strip()
-      if answer.toLowerAscii() == "n" or answer.toLowerAscii() == "no":
+      case answer.toLowerAscii():
+      of "n", "no":
         continue
-      elif answer.toLowerAscii() == "y" or answer.toLowerAscii() == "yes" or answer == "":
-        break
       else:
-        fatal "Invalid answer, exiting"
+        break
 
   if downloadUrl.len == 0:
     fatal fmt"No archives found for {pkg.gitFormat()}"
@@ -109,31 +108,21 @@ proc downloadRelease(pkg: Package, make = true) =
   pkg.extract(nerveDir / downloadPath, pkg.pkgFormat(), make)
 
 proc ghDownload*(pkg: Package, make = true) =
-    # If it has a username, run the code, otherwise searches for the closest matching one
-    # if pkg.tag.len > 0:
     pkg.downloadRelease(make)
-    # else:
-    #   let tags = pkg.ghListReleases()
-    #   ask "Which tag would you like to download?"
-    #   let answer = stdin.readLine().strip()
-
-    #   if answer notin tags:
-    #     fatal fmt"Invalid tag {answer}"
-
-    #   package(pkg.owner, pkg.repo, answer).downloadRelease()
 
 #Downloads repo without owner
 proc ghDownload*(repo: string, make = true) = 
   let pkgs = repo.ghSearch(true)
-  echo pkgs
   for pkg in pkgs:
-    if pkg.gitFormat().toLowerAscii() == repo.toLowerAscii():
-      list pkg.gitFormat()
-  ask "Which repository would you like to download? (owner/repo)" #TODO fix this to where it was before
-  let answer = stdin.readLine().strip()
-  let (ok, pkg) = answer.parsePkgFormat()
-
-  if not ok:
-    fatal fmt"Couldn't parse package {answer}"
-
-  pkg.ghDownload()
+    if pkg.repo.toLowerAscii() == repo.toLowerAscii():
+      success fmt"Repository found: {pkg.gitFormat()}"
+      ask "Are you sure you want to install this repository? [y/N]"
+      let answer = stdin.readLine().strip()
+      case answer.toLowerAscii():
+      of "y", "yes":
+        pkg.ghDownload()
+        break
+      else:
+        continue
+  if pkgs.len == 0:
+    fatal "No repositories found"
