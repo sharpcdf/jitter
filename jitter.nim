@@ -31,6 +31,16 @@ proc search(query: string) =
     for pkg in query.ghSearch():
       list &"Github: {pkg.gitFormat()}"
 
+proc setup() =
+  if dirExists(getHomeDir() / ".jitter"):
+    fatal "Jitter is already set up!"
+  info "Creating directories"
+  createDir(getHomeDir() / ".jitter")
+  createDir(getHomeDir() / ".jitter/bin")
+  createDir(getHomeDir() / ".jitter/nerve")
+  createDir(getHomeDir() / ".jitter/config")
+  success "Done!"
+  
 proc install(input: string, make = true) = 
   let (srctype, input) = input.parseInputSource()
   if '/' notin input:
@@ -155,7 +165,7 @@ const parser = newParser:
     run: 
       opts.input.install(not opts.parentOpts.nomake)
   command("update"): ## Create an update command
-    help("Updates the specified packages, or all packages if none are specified.           user/repo[@tag]") ## Help message
+    help("Updates the specified packages, or all packages if none are specified.                user/repo[@tag]") ## Help message
     arg("input") ## Positional argument called input
     run:
       opts.input.update(not opts.parentOpts.nomake)
@@ -177,6 +187,10 @@ const parser = newParser:
     help("Lists all installed packages.") ## Help message
     run:
       catalog()
+  command("setup"):
+    help("Creates needed directories if they do not exist")
+    run:
+      setup()
 when isMainModule:
   if commandLineParams().len == 0:
     parser.run(@["--help"])
