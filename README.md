@@ -69,7 +69,7 @@ Options:
 7. `jtr remove VSCodium/vscodium` - removes VSCodium/vscodium from your system
 8. `jtr install VSCodium/vscodium@1.69.0` - installs VSCodium/vscodium release with the tag `1.69.0`
 9. `jtr update VSCodium/vscodium` - updates vscodium to the latest version
-10. `jtr update (this|jitter|jtr)` - updates jitter to the latest release
+10. ~~`jtr update (this|jitter|jtr)` - updates jitter to the latest release~~ broken in the code revamp, being worked on
 11. `jtr update all` - updates all installed packages
 
 Note: repositories are case insensitive, and all AppImage file names are converted to the name of the repository. `jtr install VSCodium/vscodium` is equivalent to `jtr install vscodium/vscodium`.
