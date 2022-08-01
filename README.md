@@ -17,6 +17,11 @@ Through Nimble:
 ```
 nimble install https://github.com/sharpcdf/jitter
 ```
+Manually:
+Download the latest release and run
+```
+./jtr setup
+```
 ## Notes
 - Right now, Jitter only supports GitHub as a download source.
 - At the moment, Jitter is being developed and you need at least version 0.3.0 to use the install script. Previous releases relied on an installer called Mug.
