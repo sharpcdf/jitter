@@ -117,7 +117,11 @@ proc update(input: string, make = true) =
       "sharpcdf/jitter"
     else:
       input
-
+  if input.toLowerAscii() == "all":
+    for pkg in getInstalledPkgs():
+      pkg.remove()
+      pkg.ghDownload(make)
+    return
   let (ok, pkg) = input.parsePkgFormat()
   if not ok:
     fatal fmt"Couldn't parse package {input}"

@@ -121,7 +121,7 @@ proc ghDownload*(repo: string, make = true) =
       case answer.toLowerAscii():
       of "y", "yes":
         pkg.ghDownload()
-        break
+        return
       else:
         continue
   if pkgs.len == 0:
