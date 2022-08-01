@@ -1,5 +1,5 @@
 # Jitter
-A repository-based binary manager for Linux
+A repository-oriented binary manager for Linux
 
 ## How it works
 Jitter searches through GitHub(and hopefully soon more sources) for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, Jitter does not require a brewfile or nixfile in order to recognize the project.
@@ -7,15 +7,20 @@ Jitter searches through GitHub(and hopefully soon more sources) for releases wit
 ## Installing
 Using the `install.sh` script (recommended):
 ```
-wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true  | bash
+wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true | bash
 ```
 To pass flags such as `--force` or `--uninstall` use:
 ```
-wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true  | bash -s -- --flag
+wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true | bash -s -- --flag
 ```
 Through Nimble:
 ```
 nimble install https://github.com/sharpcdf/jitter
+```
+Manually (versions above 0.3.0):
+Download the latest release and run
+```
+./jtr setup
 ```
 ## Notes
 - Right now, Jitter only supports GitHub as a download source.
