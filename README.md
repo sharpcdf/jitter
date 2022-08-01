@@ -1,5 +1,5 @@
 # Jitter
-A repository-based binary manager for Linux
+A repository-oriented binary manager for Linux
 
 ## How it works
 Jitter searches through GitHub(and hopefully soon more sources) for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, Jitter does not require a brewfile or nixfile in order to recognize the project.
