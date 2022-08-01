@@ -17,7 +17,7 @@ Through Nimble:
 ```
 nimble install https://github.com/sharpcdf/jitter
 ```
-Manually:
+Manually (versions above 0.3.0):
 Download the latest release and run
 ```
 ./jtr setup
