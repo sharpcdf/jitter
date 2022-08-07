@@ -1,7 +1,7 @@
 import os
 
 var mainfile = "jitter.nim"
-var version = "0.2.5"
+var version = "0.4.2-dev"
 var nimble = getHomeDir() & ".nimble/pkgs"
 
 

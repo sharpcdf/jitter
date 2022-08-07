@@ -39,9 +39,11 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
 
   #Creates symlinks for executables and adds them to the bin
   for file in walkDirRec(nerveDir / toDir):
-    if file.hasExecPerms() and not symlinkExists(binDir / file.splitFile().name):
+    if not symlinkExists(binDir / file.splitFile().name):
       case file.splitFile().ext:
       of "":
+        if not file.hasExecPerms():
+          file.setFilePermissions({fpUserExec, fpOthersExec})
         file.createSymlink(binDir / file.splitFile().name)
         success fmt"Created symlink {file.splitFile().name}"
       of ".AppImage":

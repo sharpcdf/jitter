@@ -142,13 +142,23 @@ proc remove(input: string) =
     pkg.remove()
 
   success "Done"
-
-proc update(input: string, make = true) = 
-  let input = 
-    if input.toLowerAscii() in ["this", "jtr", "jitter"]:
-      "sharpcdf/jitter"
-    else:
-      input
+proc selfUpdate() =
+  ghDownload("sharpcdf/jitter", true)
+  var downloaded = false
+  var pkg: string
+  for p in getInstalledPkgs():
+    if p.owner == "sharpcdf" and p.repo == "jitter":
+      downloaded = true
+      pkg = p.pkgFormat()
+      break
+  if not downloaded:
+    fatal "Failed to update Jitter to latest version"
+  copyFile(nerveDir / pkg, getAppDir() / getAppFilename())
+  success "Successfully updated Jitter to the latest version!"
+proc update(input: string, make = true) =  
+  if input.toLowerAscii() in ["this", "jtr", "jitter"]:
+    selfUpdate()
+    return
   if input.toLowerAscii() == "all":
     for pkg in getInstalledPkgs():
       pkg.remove()
@@ -187,7 +197,7 @@ const parser = newParser:
     run: 
       opts.input.install(not opts.parentOpts.nomake)
   command("update"): ## Create an update command
-    help("Updates the specified packages, or all packages if none are specified.                user/repo[@tag]") ## Help message
+    help("Updates the specified package, Jitter itself, or all packages if specified.           [user/repo[@tag]][all][this|jitter|jtr]") ## Help message
     arg("input") ## Positional argument called input
     run:
       opts.input.update(not opts.parentOpts.nomake)
