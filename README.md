@@ -7,11 +7,11 @@ Jitter searches through GitHub(and hopefully soon more sources) for releases wit
 ## Installing
 Using the `install.sh` script (recommended):
 ```
-wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true | bash
+wget -qO- https://github.com/sharpcdf/jitter/raw/main/install.sh | bash
 ```
 To pass flags such as `--force` or `--uninstall` use:
 ```
-wget -qO- https://github.com/sharpcdf/jitter/blob/main/install.sh?raw=true | bash -s -- --flag
+wget -qO- https://github.com/sharpcdf/jitter/raw/main/install.sh | bash -s -- --flag
 ```
 Through Nimble:
 ```
