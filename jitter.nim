@@ -183,7 +183,7 @@ proc catalog() =
     list pkg.gitFormat()
 
 const parser = newParser:
-  help("A git-based binary manager for Linux") ## Help message
+  help("A repository-oriented binary manager for Linux") ## Help message
   flag("-v", "--version") ## Create a version flag
   flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
   run:
