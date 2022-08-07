@@ -142,8 +142,9 @@ proc remove(input: string) =
     pkg.remove()
 
   success "Done"
+
 proc selfUpdate() =
-  ghDownload("sharpcdf/jitter", true)
+  ghDownload(parsePkgFormat("sharpcdf/jitter").pkg, true)
   var downloaded = false
   var pkg: string
   for p in getInstalledPkgs():
@@ -155,6 +156,7 @@ proc selfUpdate() =
     fatal "Failed to update Jitter to latest version"
   copyFile(nerveDir / pkg, getAppDir() / getAppFilename())
   success "Successfully updated Jitter to the latest version!"
+
 proc update(input: string, make = true) =  
   if input.toLowerAscii() in ["this", "jtr", "jitter"]:
     selfUpdate()
