@@ -40,23 +40,25 @@ nimble build
 ## Usage
 ```
 $ jtr
-A git-based binary manager for linux.
+A repository-oriented binary manager for Linux
 
 Usage:
    [options] COMMAND
 
 Commands:
 
-  install          Installs the binaries of the given repository, if avaliable.                         [gh:][user/]repo[@tag]
-  update           Updates the specified binaries, or all binaries if none are specified.               user/repo[@tag]
-  remove           Removes the specified binaries from your system.                                     user/repo[@tag]
-  search           Searches for binaries that match the given repositories, returning them if found.    [user/]repo
+  install          Installs the given repository, if avaliable.                                          [gh:][user/]repo[@tag]
+  update           Updates the specified package, Jitter itself, or all packages if specified.           [user/repo[@tag]][all][this|jitter|jtr]
+  remove           Removes the specified package from your system.                                       user/repo[@tag]
+  search           Searches for repositories that match the given term, returning them if found.         [user/]repo
   list             Lists all executables downloaded.
   catalog          Lists all installed packages.
+  setup            Creates needed directories if they do not exist
 
 Options:
   -h, --help
   -v, --version
+  --no-make                  If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.
 ```
 
 ### Example Usage
