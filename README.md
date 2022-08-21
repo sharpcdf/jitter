@@ -5,6 +5,8 @@ A repository-oriented binary manager for Linux
 Jitter searches through GitHub(and hopefully soon more sources) for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, Jitter does not require a brewfile or nixfile in order to recognize the project.
 
 ## Installing
+Before installing, make sure you have glibc installed on your distro.
+
 Using the `install.sh` script (recommended):
 ```
 wget -qO- https://github.com/sharpcdf/jitter/raw/main/install.sh | bash
