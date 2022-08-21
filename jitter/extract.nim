@@ -15,6 +15,8 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
   info "Extracting files"
   try:
     if path.splitFile().ext == ".zip":
+      echo nerveDir / toDir
+      echo path
       ziparchives.extractAll(path, nerveDir / toDir)
     elif path.splitFile().ext == ".AppImage":
       createDir(nerveDir / toDir)
@@ -23,7 +25,9 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
     else:
       tarballs.extractAll(path, nerveDir / toDir)
   except ZippyError:
-    fatal "Failed to extract archive"
+    fatal "Failed to extract archive [ZippyError]"
+  except IOError:
+    fatal "Failed to extract archive [IOError]"
 
   path.removeFile()
   success "Files extracted"
