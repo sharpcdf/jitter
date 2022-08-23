@@ -15,8 +15,6 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
   info "Extracting files"
   try:
     if path.splitFile().ext == ".zip":
-      echo nerveDir / toDir
-      echo path
       ziparchives.extractAll(path, nerveDir / toDir)
     elif path.splitFile().ext == ".AppImage":
       createDir(nerveDir / toDir)
@@ -27,7 +25,8 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
   except ZippyError:
     fatal "Failed to extract archive [ZippyError]"
   except IOError:
-    fatal "Failed to extract archive [IOError]"
+    error "Failed to extract archive [IOError]"
+    raise
 
   path.removeFile()
   success "Files extracted"
@@ -46,8 +45,8 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
     if not symlinkExists(binDir / file.splitFile().name):
       case file.splitFile().ext:
       of "":
-        if not file.hasExecPerms():
-          file.setFilePermissions({fpUserExec, fpOthersExec})
+        if not file.hasExecPerms() and file.toLowerAscii() != "makefile":
+          file.setFilePermissions({fpUserExec, fpOthersExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
         file.createSymlink(binDir / file.splitFile().name)
         success fmt"Created symlink {file.splitFile().name}"
       of ".AppImage":

@@ -102,7 +102,7 @@ proc downloadRelease(pkg: Package, make = true) =
       
   info fmt"Downloading {downloadUrl}"
 
-  client.downloadFile(downloadUrl, nerveDir / downloadPath)
+  client.downloadFile(downloadUrl, getHomeDir() / downloadPath)
   success fmt"Downloaded {pkg.gitFormat()}"
 
   pkg.extract(nerveDir / downloadPath, pkg.pkgFormat(), make)
