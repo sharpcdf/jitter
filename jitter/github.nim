@@ -73,8 +73,10 @@ proc downloadRelease(pkg: Package, make = true) =
   let data = content.parseJson()
   let pkg = package(pkg.owner, pkg.repo, data["tag_name"].getStr())
   #ditto
+  #[
   if dirExists(nerveDir / pkg.pkgFormat()):
     fatal fmt"Package {pkg.gitFormat()} already exists."
+  ]#
 
   info "Looking for compatible archives"
   #TODO make download specific to cpu type
@@ -101,8 +103,8 @@ proc downloadRelease(pkg: Package, make = true) =
     fatal fmt"No archives found for {pkg.gitFormat()}"
       
   info fmt"Downloading {downloadUrl}"
-
-  client.downloadFile(downloadUrl, getHomeDir() / downloadPath)
+  #downloadPath should be ~/.jitter/nerve/repo-release.tar.gz or similar
+  client.downloadFile(downloadUrl, nerveDir / downloadPath)
   success fmt"Downloaded {pkg.gitFormat()}"
 
   pkg.extract(nerveDir / downloadPath, pkg.pkgFormat(), make)

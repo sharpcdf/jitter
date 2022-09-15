@@ -53,6 +53,8 @@ proc isCompatibleOS*(file: string): bool =
     if os in file:
       return false
 
+proc isExecFile*(file:string): bool = 
+  return file.startsWith(".") or file.toLowerAscii() == "makefile" or "license" in file.toLowerAscii()
 proc hasExecPerms*(file: string): bool =
   let perms = getFilePermissions(file)
   return fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms
