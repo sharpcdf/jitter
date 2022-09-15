@@ -31,7 +31,7 @@ Download the latest release and run
 - With the release of Jitter 0.3.0, many things broke and are being worked on. If you find a bug with a command or flag, please tell us so we can fix it
 
 ## Building
-Clone the repository and run `nimble build`.
+Clone the repository and run `nimble build` to create a release version, or `nim debug` to debug the code after making changes.
 (You need to have Nim and Nimble installed).
 ```
 git clone https://github.com/sharpcdf/jitter
