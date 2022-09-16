@@ -26,10 +26,8 @@ Download the latest release and run
 ```
 ## Notes
 - Right now, Jitter only supports GitHub as a download source.
-- At the moment, Jitter is being developed and you need at least version 0.3.0 to use the install script. Previous releases relied on an installer called Mug.
 - You may encounter bugs as this project is still in development, please create an issue if you encounter anything wrong with jitter :)
-- With the release of Jitter 0.3.0, many things broke and are being worked on. If you find a bug with a command or flag, please tell us so we can fix it
-
+- On Ubuntu, you may need to run `sudo apt install glibc-source` in order to use jitter.
 ## Building
 Clone the repository and run `nimble build` to create a release version, or `nim debug` to debug the code after making changes.
 (You need to have Nim and Nimble installed).
