@@ -72,11 +72,6 @@ proc downloadRelease(pkg: Package, make = true) =
 
   let data = content.parseJson()
   let pkg = package(pkg.owner, pkg.repo, data["tag_name"].getStr())
-  #ditto
-  #[
-  if dirExists(nerveDir / pkg.pkgFormat()):
-    fatal fmt"Package {pkg.gitFormat()} already exists."
-  ]#
 
   info "Looking for compatible archives"
   #TODO make download specific to cpu type
@@ -88,7 +83,6 @@ proc downloadRelease(pkg: Package, make = true) =
     if name.isCompatibleExt() and name.isCompatibleCPU() and name.isCompatibleOS():
       downloadUrl = asset["browser_download_url"].getStr()
       downloadPath = name
-      #TODO: fix download proceeding despite 'no' response
       success fmt"Archive found: {name}"
       let yes = prompt("Are you sure you want to download this archive? There might be other compatible assets.")
       if yes:
@@ -101,8 +95,9 @@ proc downloadRelease(pkg: Package, make = true) =
   if downloadUrl.len == 0:
     fatal fmt"No archives found for {pkg.gitFormat()}"
   for f in walkDir(nerveDir):
+    #f.path.splitFile().name is just the repository in package format, this checks if that repository is the same repository AND the same version as the queued one
     if f.path.splitFile().name == pkg.pkgFormat():
-      fatal "Repository is already installed, exiting"
+      fatal "Repository is already installed, try installing a different version"
   info fmt"Downloading {downloadUrl}"
   #downloadPath should be ~/.jitter/nerve/repo-release.tar.gz or similar
   client.downloadFile(downloadUrl, nerveDir / downloadPath)
