@@ -20,7 +20,7 @@ proc getInstalledPkgs*(): seq[Package] =
     if kind == pcDir and (let (ok, pkg) = path.splitPath.tail.parsePkgFormat(); ok):
       result.add(pkg)
 
-proc search(query: string) = 
+proc search(query: string, exactmatch = false) = 
   if '/' in query: 
     let (ok, pkg) = query.parsePkgFormat()
     if not ok:
@@ -28,7 +28,7 @@ proc search(query: string) =
 
     discard pkg.ghListReleases()
   else:
-    for pkg in query.ghSearch():
+    for pkg in query.ghSearch(exactmatch):
       list &"Github: {pkg.gitFormat()}"
 
 proc setup() =
@@ -187,6 +187,7 @@ const parser = newParser:
   help("A repository-oriented binary manager for Linux") ## Help message
   flag("-v", "--version") ## Create a version flag
   flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
+  flag("--exactmatch", help = "When searching for a repository, only repositories with the query AS THEIR NAME will be shown. Jitter shows any repository returned by the query.")
   run:
     if opts.version: ## If the version flag was passed
       styledEcho(fgCyan, "Jitter version ", fgYellow, version)
@@ -211,7 +212,7 @@ const parser = newParser:
     help("Searches for repositories that match the given term, returning them if found.         [user/]repo") ## Help message
     arg("query") ## Positional argument called query
     run:
-      opts.query.search()
+      opts.query.search(opts.parentOpts.exactmatch)
   command("list"): ## Create a list command
     help("Lists all executables downloaded.") ## Help message
     run:
