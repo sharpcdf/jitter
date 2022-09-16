@@ -24,6 +24,11 @@ Download the latest release and run
 ```
 ./jtr setup
 ```
+## Uninstalling
+Through the install.sh script:
+```
+wget -qO- https://github.com/sharpcdf/jitter/raw/main/install.sh | bash -s -- --uninstall
+```
 ## Notes
 - Right now, Jitter only supports GitHub as a download source.
 - You may encounter bugs as this project is still in development, please create an issue if you encounter anything wrong with jitter :)
