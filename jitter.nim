@@ -40,10 +40,8 @@ proc setup() =
   createDir(getHomeDir() / ".jitter/nerve")
   createDir(getHomeDir() / ".jitter/config")
   success "Done!"
-  ask &"Do you want to add {getAppDir()} to your path? [y/N]"
-  let answer = stdin.readLine()
-  case answer.toLowerAscii():
-  of "y", "yes":
+  let yes = prompt(&"Do you want to add {getAppDir()} to your path?")
+  if yes:
     if &"export PATH=$PATH:{getAppDir()}" in readFile(getHomeDir() / ".bashrc"):
       error "Jitter is already in your .bashrc file!"
     else:
@@ -62,6 +60,7 @@ proc setup() =
         success "Added to fish path!"
   else:
     info &"Consider running 'echo \"export PATH=$PATH:{getAppDir()}\" >> {getHomeDir()}.bashrc' to add it to your bash path."
+    
   
 proc install(input: string, make = true) = 
   let (srctype, input) = input.parseInputSource()
@@ -234,13 +233,11 @@ when isMainModule:
         parser.run()
       else:
         error "Jitter is not installed"
-        ask "Do you want to install jitter? [Y/n]"
-        let answer = stdin.readLine()
-        case answer.toLowerAscii():
-        of "n", "no":
-          info "Check https://github.com/sharpcdf/jitter for more information on installing jitter."
-        else:
+        let yes = prompt("Do you want to install jitter?")
+        if yes:
           parser.run(@["setup"])
+        else:
+          info "Check https://github.com/sharpcdf/jitter for more information on installing jitter."
           
     except ShortCircuit, UsageError:
       error "Error parsing arguments. Make sure to dot your Ts and cross your Is and try again. Oh, wait."

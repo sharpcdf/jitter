@@ -9,12 +9,15 @@ let baseDir = getHomeDir() & ".jitter/"
 let nerveDir = baseDir / "nerve"
 let binDir = baseDir / "bin"
 var duplicate = false
+proc makeSymlink(file:string, pkg:Package)
+
 proc extract*(pkg: Package, path, toDir: string, make = true) =
   ## Extracts `path` inside `toDir` directory.
 
   info "Extracting files"
   for p in walkDir(nerveDir):
     if pkg.repo in p.path and pkg.owner in p.path:
+      echo "duplicate"
       duplicate = true
       break
   try:
@@ -60,17 +63,33 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
 
   #Creates symlinks for executables and adds them to the bin
   for file in walkDirRec(nerveDir / toDir):
-    if not symlinkExists(binDir / file.splitFile().name):
-      case file.splitFile().ext:
-      of "":
-        if not file.hasExecPerms() and file.splitFile().name.isExecFile():
-          file.setFilePermissions({fpUserExec, fpOthersExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
-        if file.hasExecPerms() and file.splitFile().name.isExecFile():
-          #if not duplicate:
-          file.createSymlink(binDir / file.splitFile().name)
-          #else:
-          #  file.createSymlink(binDir / fmt"{file.splitFile().name}-{pkg.tag}")
-          success fmt"Created symlink {file.splitFile().name}"
-      of ".AppImage":
-        file.createSymlink(binDir / pkg.repo)
-        success fmt"Created symlink {pkg.repo}"
+    if not duplicate:
+      if not symlinkExists(binDir / file.splitFile().name):
+        makeSymlink(file, pkg)
+    else:
+      if not symlinkExists(binDir / fmt"{file.splitFile().name}-{pkg.tag}"):
+        makeSymlink(file, pkg)
+
+proc makeSymlink(file:string, pkg:Package) =
+  case file.splitFile().ext:
+  of "":
+    if not file.hasExecPerms() and file.splitFile().name.isExecFile():
+      file.setFilePermissions({fpUserExec, fpOthersExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
+    if file.hasExecPerms() and file.splitFile().name.isExecFile():
+      var name: string
+      try:
+        if not duplicate:
+          name = file.splitFile().name
+          file.createSymlink(binDir / name)
+        else:
+          name = fmt"{file.splitFile().name}@{pkg.tag}"
+          file.createSymlink(binDir / name)
+      except:
+        error fmt"Failed to create symlink for {file}"
+      success fmt"Created symlink {name}"
+  of ".AppImage":
+    try:
+      file.createSymlink(binDir / pkg.repo)
+    except:
+      fatal fmt"Failed to create symlink for {pkg.repo}"
+    success fmt"Created symlink {pkg.repo}"

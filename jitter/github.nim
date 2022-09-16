@@ -82,7 +82,6 @@ proc downloadRelease(pkg: Package, make = true) =
   #TODO make download specific to cpu type
 
   var downloadUrl, downloadPath: string
-
   for asset in data["assets"].getElems():
     let name = asset["name"].getStr()
     #Checks if asset has extension .tar.gz, .tar.xz, .tgz, is not ARM
@@ -91,13 +90,13 @@ proc downloadRelease(pkg: Package, make = true) =
       downloadPath = name
       #TODO: fix download proceeding despite 'no' response
       success fmt"Archive found: {name}"
-      ask "Are you sure you want to download this archive? There might be other compatible assets. [Y/n]"
-      var answer = stdin.readLine().strip()
-      case answer.toLowerAscii():
-      of "n", "no":
-        continue
-      else:
+      let yes = prompt("Are you sure you want to download this archive? There might be other compatible assets.")
+      if yes:
         break
+      else:
+        downloadUrl = ""
+        downloadPath = ""
+        continue
 
   if downloadUrl.len == 0:
     fatal fmt"No archives found for {pkg.gitFormat()}"
@@ -119,10 +118,8 @@ proc ghDownload*(repo: string, make = true) =
   for pkg in pkgs:
     if pkg.repo.toLowerAscii() == repo.toLowerAscii():
       success fmt"Repository found: {pkg.gitFormat()}"
-      ask "Are you sure you want to install this repository? [y/N]"
-      let answer = stdin.readLine().strip()
-      case answer.toLowerAscii():
-      of "y", "yes":
+      let yes = prompt("Are you sure you want to install this repository?")
+      if yes:
         pkg.ghDownload()
         return
       else:

@@ -1,5 +1,5 @@
 import std/[strformat, strutils, strscans, os]
-
+import log
 type
   Package* = object
     owner*, repo*, tag*: string
@@ -58,6 +58,7 @@ proc isExecFile*(file:string): bool =
     return false
   else:
     return true
+
 proc hasExecPerms*(file: string): bool =
   let perms = getFilePermissions(file)
   if fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms:
@@ -65,6 +66,18 @@ proc hasExecPerms*(file: string): bool =
   else:
     return false
 
+proc prompt*(question: string): bool =
+  ask fmt"{question} [y/n]"
+  let r = stdin.readLine().strip()
+  case r.toLowerAscii():
+  of "n", "no":
+    return false
+  of "y", "yes":
+    return true
+  else:
+    error "Invalid answer given."
+    prompt(question)
+  
 proc validIdent(input: string, strVal: var string, start: int, validChars = IdentChars + {'.', '-'}): int =
   while start + result < input.len and input[start + result] in validChars:
     strVal.add(input[start + result])
