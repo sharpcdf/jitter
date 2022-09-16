@@ -17,7 +17,6 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
   info "Extracting files"
   for p in walkDir(nerveDir):
     if pkg.repo in p.path and pkg.owner in p.path:
-      echo "duplicate"
       duplicate = true
       break
   try:
