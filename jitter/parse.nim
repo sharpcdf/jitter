@@ -54,10 +54,16 @@ proc isCompatibleOS*(file: string): bool =
       return false
 
 proc isExecFile*(file:string): bool = 
-  return file.startsWith(".") or file.toLowerAscii() == "makefile" or "license" in file.toLowerAscii()
+  if file.startsWith(".") or file.toLowerAscii() == "makefile" or "license" in file.toLowerAscii():
+    return false
+  else:
+    return true
 proc hasExecPerms*(file: string): bool =
   let perms = getFilePermissions(file)
-  return fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms
+  if fpUserExec in perms or fpGroupExec in perms or fpOthersExec in perms:
+    return true
+  else:
+    return false
 
 proc validIdent(input: string, strVal: var string, start: int, validChars = IdentChars + {'.', '-'}): int =
   while start + result < input.len and input[start + result] in validChars:

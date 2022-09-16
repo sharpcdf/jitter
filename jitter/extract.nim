@@ -60,18 +60,16 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
 
   #Creates symlinks for executables and adds them to the bin
   for file in walkDirRec(nerveDir / toDir):
-    if file.splitFile().name == "odin":
-      echo file
     if not symlinkExists(binDir / file.splitFile().name):
       case file.splitFile().ext:
       of "":
         if not file.hasExecPerms() and file.splitFile().name.isExecFile():
           file.setFilePermissions({fpUserExec, fpOthersExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
         if file.hasExecPerms() and file.splitFile().name.isExecFile():
-          if not duplicate:
-            file.createSymlink(binDir / file.splitFile().name)
-          else:
-            file.createSymlink(binDir / fmt"{file.splitFile().name}-{pkg.tag}")
+          #if not duplicate:
+          file.createSymlink(binDir / file.splitFile().name)
+          #else:
+          #  file.createSymlink(binDir / fmt"{file.splitFile().name}-{pkg.tag}")
           success fmt"Created symlink {file.splitFile().name}"
       of ".AppImage":
         file.createSymlink(binDir / pkg.repo)

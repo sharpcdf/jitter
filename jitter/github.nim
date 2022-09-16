@@ -89,7 +89,7 @@ proc downloadRelease(pkg: Package, make = true) =
     if name.isCompatibleExt() and name.isCompatibleCPU() and name.isCompatibleOS():
       downloadUrl = asset["browser_download_url"].getStr()
       downloadPath = name
-
+      #TODO: fix download proceeding despite 'no' response
       success fmt"Archive found: {name}"
       ask "Are you sure you want to download this archive? There might be other compatible assets. [Y/n]"
       var answer = stdin.readLine().strip()
@@ -101,12 +101,13 @@ proc downloadRelease(pkg: Package, make = true) =
 
   if downloadUrl.len == 0:
     fatal fmt"No archives found for {pkg.gitFormat()}"
-      
+  for f in walkDir(nerveDir):
+    if f.path.splitFile().name == pkg.pkgFormat():
+      fatal "Repository is already installed, exiting"
   info fmt"Downloading {downloadUrl}"
   #downloadPath should be ~/.jitter/nerve/repo-release.tar.gz or similar
   client.downloadFile(downloadUrl, nerveDir / downloadPath)
-  success fmt"Downloaded {pkg.gitFormat()}"
-
+  success fmt"Downloaded {pkg.gitFormat}"
   pkg.extract(nerveDir / downloadPath, pkg.pkgFormat(), make)
 
 proc ghDownload*(pkg: Package, make = true) =
