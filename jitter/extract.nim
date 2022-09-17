@@ -79,16 +79,20 @@ proc makeSymlink(file:string, pkg:Package) =
       try:
         if not duplicate:
           name = file.splitFile().name
-          file.createSymlink(binDir / name)
         else:
           name = fmt"{file.splitFile().name}@{pkg.tag}"
-          file.createSymlink(binDir / name)
+        file.createSymlink(binDir / name)
       except:
         error fmt"Failed to create symlink for {file}"
       success fmt"Created symlink {name}"
   of ".AppImage":
+    var name: string
     try:
-      file.createSymlink(binDir / pkg.repo)
+      if not duplicate:
+        name = pkg.repo
+      else:
+        name = fmt"{pkg.repo}@{pkg.tag}"
+      file.createSymlink(binDir / name)
     except:
       fatal fmt"Failed to create symlink for {pkg.repo}"
     success fmt"Created symlink {pkg.repo}"
