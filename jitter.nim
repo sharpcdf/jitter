@@ -15,13 +15,13 @@ let baseDir = getHomeDir() / ".jitter"
 let nerveDir = baseDir / "nerve"
 let binDir = baseDir / "bin"
 
-proc getInstalledPkgs*(): seq[Package] = 
+proc getInstalledPkgs*(): seq[Package] =
   for kind, path in walkDir(nerveDir):
     if kind == pcDir and (let (ok, pkg) = path.splitPath.tail.parsePkgFormat(); ok):
       result.add(pkg)
 
-proc search(query: string, exactmatch = false) = 
-  if '/' in query: 
+proc search(query: string, exactmatch = false) =
+  if '/' in query:
     let (ok, pkg) = query.parsePkgFormat()
     if not ok:
       fatal fmt"Couldn't parse package {query}"
@@ -51,7 +51,8 @@ proc setup() =
       success "Added to bash path!"
     if getEnv("SHELL") == "/usr/bin/fish":
       info "Adding jitter to fish user paths via config.fish file"
-      if &"set -U fish_user_paths $fish_user_paths {getAppDir()}" in readFile(&"{getHomeDir()}.config/fish/config.fish"):
+      if &"set -U fish_user_paths $fish_user_paths {getAppDir()}" in readFile(
+          &"{getHomeDir()}.config/fish/config.fish"):
         error "Jitter is already in your config.fish file!"
       else:
         let f = open(getHomeDir() / ".config/fish/config.fish", fmAppend)
@@ -60,9 +61,9 @@ proc setup() =
         success "Added to fish path!"
   else:
     info &"Consider running 'echo \"export PATH=$PATH:{getAppDir()}\" >> {getHomeDir()}.bashrc' to add it to your bash path."
-    
-  
-proc install(input: string, make = true) = 
+
+
+proc install(input: string, make = true) =
   let (srctype, input) = input.parseInputSource()
   if '/' notin input:
     info fmt"Searching for {input}"
@@ -96,7 +97,7 @@ proc install(input: string, make = true) =
   if success:
     success "Binaries successfully installed"
 
-proc remove(pkg: Package) = 
+proc remove(pkg: Package) =
   for kind, path in walkDir(binDir):
     if kind == pcLinkToFile and pkg.pkgFormat() in path.expandSymlink():
       info fmt"Removing symlink {path}"
@@ -104,7 +105,7 @@ proc remove(pkg: Package) =
 
   removeDir(nerveDir / pkg.pkgFormat().toLowerAscii())
 
-proc remove(input: string) = 
+proc remove(input: string) =
   let (ok, pkg) = input.parsePkgFormat()
   if not ok:
     fatal fmt"Couldn't parse package {input}"
@@ -156,7 +157,7 @@ proc selfUpdate() =
   copyFile(nerveDir / pkg, getAppDir() / getAppFilename())
   success "Successfully updated Jitter to the latest version!"
 
-proc update(input: string, make = true) =  
+proc update(input: string, make = true) =
   if input.toLowerAscii() in ["this", "jtr", "jitter"]:
     selfUpdate()
     return
@@ -172,53 +173,53 @@ proc update(input: string, make = true) =
   input.remove()
   pkg.ghDownload(make)
 
-  success fmt"Successfully updated {pkg}"
+  success fmt"Successfully updated {pkg.owner}/{pkg.repo}"
 
-proc list() = 
+proc list() =
   for kind, path in walkDir(binDir):
     if path.hasExecPerms() and path.extractFilename() != "jtr":
       list path.extractFilename()
 
-proc catalog() = 
+proc catalog() =
   for pkg in getInstalledPkgs():
     list pkg.gitFormat()
 
 const parser = newParser:
   help("A repository-oriented binary manager for Linux") ## Help message
-  flag("-v", "--version") ## Create a version flag
+  flag("-v", "--version")                                ## Create a version flag
   flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
   flag("--exactmatch", help = "When searching for a repository, only repositories with the query AS THEIR NAME will be shown. Jitter shows any repository returned by the query.")
   run:
-    if opts.version: ## If the version flag was passed
+    if opts.version:                                     ## If the version flag was passed
       styledEcho(fgCyan, "Jitter version ", fgYellow, version)
       styledEcho("For more information visit ", fgGreen, "https://github.com/sharpcdf/jitter")
 
-  command("install"): ## Create an install command
+  command("install"):                                    ## Create an install command
     help("Installs the given repository, if avaliable.                                          [gh:][user/]repo[@tag]") ## Help message
-    arg("input") ## Positional argument called input
-    run: 
+    arg("input")                                         ## Positional argument called input
+    run:
       opts.input.install(not opts.parentOpts.nomake)
-  command("update"): ## Create an update command
+  command("update"):                                     ## Create an update command
     help("Updates the specified package, Jitter itself, or all packages if specified.           [user/repo[@tag]][all][this|jitter|jtr]") ## Help message
-    arg("input") ## Positional argument called input
+    arg("input")                                         ## Positional argument called input
     run:
       opts.input.update(not opts.parentOpts.nomake)
-  command("remove"): ## Create a remove command
+  command("remove"):                                     ## Create a remove command
     help("Removes the specified package from your system.                                       user/repo[@tag]") ## Help message
-    arg("input") ## Positional arugment called input
+    arg("input")                                         ## Positional arugment called input
     run:
       opts.input.toLowerAscii().remove()
-  command("search"): ## Create a search command
+  command("search"):                                     ## Create a search command
     help("Searches for repositories that match the given term, returning them if found.         [user/]repo") ## Help message
-    arg("query") ## Positional argument called query
+    arg("query")                                         ## Positional argument called query
     run:
       opts.query.search(opts.parentOpts.exactmatch)
-  command("list"): ## Create a list command
-    help("Lists all executables downloaded.") ## Help message
+  command("list"):                                       ## Create a list command
+    help("Lists all executables downloaded.")            ## Help message
     run:
       list()
-  command("catalog"): ## Create a catalog command
-    help("Lists all installed packages.") ## Help message
+  command("catalog"):                                    ## Create a catalog command
+    help("Lists all installed packages.")                ## Help message
     run:
       catalog()
   command("setup"):
@@ -239,6 +240,6 @@ when isMainModule:
           parser.run(@["setup"])
         else:
           info "Check https://github.com/sharpcdf/jitter for more information on installing jitter."
-          
+
     except ShortCircuit, UsageError:
       error "Error parsing arguments. Make sure to dot your Ts and cross your Is and try again. Oh, wait."
