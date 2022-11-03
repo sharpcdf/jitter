@@ -1,6 +1,6 @@
 # Package
 
-version                = "0.4.1"
+version                = "0.4.2-dev"
 author                 = "sharpcdf"
 description            = "A git-based binary manager for linux."
 license                = "MIT"

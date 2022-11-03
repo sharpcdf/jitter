@@ -63,11 +63,11 @@ proc setup() =
     info &"Consider running 'echo \"export PATH=$PATH:{getAppDir()}\" >> {getHomeDir()}.bashrc' to add it to your bash path."
 
 
-proc install(input: string, make = true) =
+proc install(input: string, make = true, build = false) =
   let (srctype, input) = input.parseInputSource()
   if '/' notin input:
     info fmt"Searching for {input}"
-    input.ghDownload(make)
+    input.ghDownload(make, build)
     return
 
   let (ok, pkg) = input.parsePkgFormat()
@@ -78,7 +78,7 @@ proc install(input: string, make = true) =
   var success = true
   case srctype:
   of GitHub:
-    pkg.ghDownload(make)
+    pkg.ghDownload(make, build)
   of GitLab:
     #pkg.glDownload(make)
     discard
@@ -189,6 +189,7 @@ const parser = newParser:
   flag("-v", "--version")                                ## Create a version flag
   flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
   flag("--exactmatch", help = "When searching for a repository, only repositories with the query AS THEIR NAME will be shown. Jitter shows any repository returned by the query.")
+  flag("-g", help = "Clones the repo, and looks for makefiles or supported file types to build, then adds built executables to the bin")
   run:
     if opts.version:                                     ## If the version flag was passed
       styledEcho(fgCyan, "Jitter version ", fgYellow, version)
@@ -198,7 +199,7 @@ const parser = newParser:
     help("Installs the given repository, if avaliable.                                          [gh:][user/]repo[@tag]") ## Help message
     arg("input")                                         ## Positional argument called input
     run:
-      opts.input.install(not opts.parentOpts.nomake)
+      opts.input.install(not opts.parentOpts.nomake, opts.parentOpts.g)
   command("update"):                                     ## Create an update command
     help("Updates the specified package, Jitter itself, or all packages if specified.           [user/repo[@tag]][all][this|jitter|jtr]") ## Help message
     arg("input")                                         ## Positional argument called input

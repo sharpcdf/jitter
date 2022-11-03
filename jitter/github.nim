@@ -1,6 +1,6 @@
-import std/[httpclient, strformat, strutils, json, uri, os]
+import std/[httpclient, strformat, strutils, json, uri, os, osproc]
 
-import extract, parse, log
+import finish, parse, log
 
 #TODO add support for appimage downloads
 #TODO prefer appimages -> .tar.gz -> .tgz -> .zip
@@ -8,6 +8,14 @@ import extract, parse, log
 let baseDir = getHomeDir() & ".jitter/"
 let nerveDir = baseDir / "nerve"
 
+
+#Clones and builds the repo
+proc ghBuild*(pkg: Package) =
+  let url = fmt"https://github.com/{pkg.owner}/{pkg.repo}"
+  if (let op = execCmdEx(&"git {url} {nerveDir}/{pkg.pkgFormat()}/"); op.exitCode != 0):
+    fatal fmt"Failed to clone git repository: {op.output}"
+  make()
+  walkForExec(pkg)
 proc ghListReleases*(pkg: Package): seq[string] = 
   ## List and return pkg release tags.
   let url = fmt"https://api.github.com/repos/{pkg.owner}/{pkg.repo}/releases"
@@ -104,18 +112,24 @@ proc downloadRelease(pkg: Package, make = true) =
   success fmt"Downloaded {pkg.gitFormat}"
   pkg.extract(nerveDir / downloadPath, pkg.pkgFormat(), make)
 
-proc ghDownload*(pkg: Package, make = true) =
+proc ghDownload*(pkg: Package, make = true, build = false) =
+  if not build:
     pkg.downloadRelease(make)
+  else:
+    pkg.ghBuild()
 
 #Downloads repo without owner
-proc ghDownload*(repo: string, make = true) = 
+proc ghDownload*(repo: string, make = true, build = false) = 
   let pkgs = repo.ghSearch(true)
   for pkg in pkgs:
     if pkg.repo.toLowerAscii() == repo.toLowerAscii():
       success fmt"Repository found: {pkg.gitFormat()}"
       let yes = prompt("Are you sure you want to install this repository?")
       if yes:
-        pkg.ghDownload()
+        if not build:
+          pkg.ghDownload()
+        else:
+          pkg.ghBuild()
         return
       else:
         continue

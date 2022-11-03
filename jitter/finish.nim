@@ -9,14 +9,35 @@ let baseDir = getHomeDir() & ".jitter/"
 let nerveDir = baseDir / "nerve"
 let binDir = baseDir / "bin"
 var duplicate = false
+var dest: string
+
 proc makeSymlink(file:string, pkg:Package)
+
+proc walkForExec*(pkg: Package) =
+  #Creates symlinks for executables and adds them to the bin
+  for file in walkDirRec(nerveDir / dest):
+    if not duplicate:
+      if not symlinkExists(binDir / file.splitFile().name):
+        makeSymlink(file, pkg)
+    else:
+      if not symlinkExists(binDir / fmt"{file.splitFile().name}-{pkg.tag}"):
+        makeSymlink(file, pkg)
+
+proc make*() =
+    for path in walkDirRec(nerveDir / dest):
+      if path.extractFilename() .toLowerAscii() == "makefile":
+        info fmt"Attempting to make {path}"
+        if execCmdEx(fmt"make -C {path.splitFile.dir}").exitCode != 0:
+          error fmt"Error: failed to make {path}"
+        else:
+          success fmt"Successfully made makefile {path}"
 
 proc extract*(pkg: Package, path, toDir: string, make = true) =
   ## Extracts `path` inside `toDir` directory.
-
+  dest = toDir
   info "Extracting files"
   for p in walkDir(nerveDir):
-    if pkg.repo in p.path and pkg.owner in p.path:
+    if pkg.pkgFormat() in p.path:
       duplicate = true
       break
   try:
@@ -48,26 +69,12 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
 
   #if the --no-make flag isnt passed than this happens
   if make:
-    for path in walkDirRec(nerveDir / toDir):
-      if path.extractFilename() .toLowerAscii() == "makefile":
-        info fmt"Attempting to make {path}"
-        if execCmdEx(fmt"make -C {path.splitFile.dir}").exitCode != 0:
-          error fmt"Error: failed to make {path}"
-        else:
-          success fmt"Successfully made makefile {path}"
+    make()
   else:
     info "--no-make flag found, skipping make process"
-
   info "Adding executables to bin"
 
-  #Creates symlinks for executables and adds them to the bin
-  for file in walkDirRec(nerveDir / toDir):
-    if not duplicate:
-      if not symlinkExists(binDir / file.splitFile().name):
-        makeSymlink(file, pkg)
-    else:
-      if not symlinkExists(binDir / fmt"{file.splitFile().name}-{pkg.tag}"):
-        makeSymlink(file, pkg)
+  walkForExec(pkg)
 
 proc makeSymlink(file:string, pkg:Package) =
   case file.splitFile().ext:
