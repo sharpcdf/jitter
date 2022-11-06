@@ -46,7 +46,7 @@ nimble build
 
 ## Usage
 ```
-$ jtr
+❯ jtr -h
 A repository-oriented binary manager for Linux
 
 Usage:
@@ -66,6 +66,8 @@ Options:
   -h, --help
   -v, --version
   --no-make                  If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.
+  --exactmatch               When searching for a repository, only repositories with the query AS THEIR NAME will be shown. Jitter shows any repository returned by the query.
+  -g                         Clones the repo, and looks for makefiles or supported file types to build, then adds built executables to the bin
 ```
 
 ### Example Usage
