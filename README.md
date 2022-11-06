@@ -32,7 +32,9 @@ wget -qO- https://github.com/sharpcdf/jitter/raw/main/install.sh | bash -s -- --
 ## Notes
 - Right now, Jitter only supports GitHub as a download source.
 - You may encounter bugs as this project is still in development, please create an issue if you encounter anything wrong with jitter :)
-- On Ubuntu, you may need to run `sudo apt install glibc-source` in order to use jitter.
+- On Ubuntu or other distros, you may need to run `sudo apt install glibc-source` or similiar in order to use jitter.
+- Because Jitter has no way of knowing what executable is meant to be run by the end user, it uses a loose method of finding the executables, and therefore there may be irrelavant executables added to the bin.
+- Jitter requires git to be installed when using the -g flag
 ## Building
 Clone the repository and run `nimble build` to create a release version, or `nim debug` to debug the code after making changes.
 (You need to have Nim and Nimble installed).
