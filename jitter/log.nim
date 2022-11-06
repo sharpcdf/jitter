@@ -1,4 +1,4 @@
-import std/terminal
+import std/[terminal, strformat, strutils]
 
 proc info*(s: string) =
   styledEcho({styleBright}, fgCyan, "[I]", resetStyle, " ", fgBlue, styleUnderscore, s)
@@ -18,3 +18,15 @@ proc ask*(s: string) =
 
 proc error*(s: string) =
   styledEcho({styleBright}, fgRed, "[E]", resetStyle, " ", fgRed, s)
+
+proc prompt*(question: string): bool =
+  ask fmt"{question} [y/n]"
+  let r = stdin.readLine().strip()
+  case r.toLowerAscii():
+  of "n", "no":
+    return false
+  of "y", "yes":
+    return true
+  else:
+    error "Invalid answer given."
+    prompt(question)

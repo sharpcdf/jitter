@@ -8,38 +8,86 @@ import log, parse
 let baseDir = getHomeDir() & ".jitter/"
 let nerveDir = baseDir / "nerve"
 let binDir = baseDir / "bin"
-var duplicate = false
 var dest: string
-
-proc makeSymlink(file:string, pkg:Package)
+var dup: bool
+proc makeSymlink(file:string, pkg:Package) =
+  case file.splitFile().ext:
+  of "":
+    if not file.hasExecPerms() and file.isExecFile():
+      file.setFilePermissions({fpUserExec, fpOthersExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
+    if file.hasExecPerms() and file.isExecFile():
+      let name = 
+        if not dup:
+          file.splitFile().name
+        else:
+          fmt"{file.splitFile().name}@{pkg.tag}"
+      try:
+        file.createSymlink(binDir / name)
+      except:
+        error fmt"Failed to create symlink for {file}"
+      success fmt"Created symlink {name} from {file}"
+  of ".AppImage":
+    let name =
+      if not dup:
+        pkg.repo
+      else:
+        fmt"{pkg.repo}@{pkg.tag}"
+    try:
+      file.createSymlink(binDir / name)
+    except:
+      fatal fmt"Failed to create symlink for {pkg.repo}"
+    success fmt"Created symlink {pkg.repo}"
 
 proc walkForExec*(pkg: Package) =
   #Creates symlinks for executables and adds them to the bin
   for file in walkDirRec(nerveDir / dest):
-    if not duplicate:
-      if not symlinkExists(binDir / file.splitFile().name):
-        makeSymlink(file, pkg)
-    else:
-      if not symlinkExists(binDir / fmt"{file.splitFile().name}-{pkg.tag}"):
-        makeSymlink(file, pkg)
+    if ".git" in file:
+      continue
+    makeSymlink(file, pkg)
 
 proc make*() =
     for path in walkDirRec(nerveDir / dest):
-      if path.extractFilename() .toLowerAscii() == "makefile":
+      if path.extractFilename().toLowerAscii() == "makefile":
         info fmt"Attempting to make {path}"
-        if execCmdEx(fmt"make -C {path.splitFile.dir}").exitCode != 0:
-          error fmt"Error: failed to make {path}"
+        if (let ex = execCmdEx(fmt"make -C {path.splitFile.dir}"); ex.exitCode != 0):
+          error fmt"Failed to make {path}: {ex.output}"
         else:
           success fmt"Successfully made makefile {path}"
 
+proc build*(pkg: Package, dupl = false) =
+  dest = pkg.pkgFormat()
+  dup = dupl
+  var built = false
+  for p in walkDir(nerveDir / dest):
+    let path = p.path
+    #checks if file is a makefile or sh file with build in the name
+    if path.extractFilename().toLowerAscii() == "makefile":
+      info fmt"Attempting to build package with file {path}..."
+      if (let ex = execCmdEx(fmt"make -C {path.splitFile.dir}"); ex.exitCode != 0):
+        error fmt"Failed to make {path}: {ex.output}"
+      else:
+        success fmt"Successfully made makefile {path}"
+        built = true
+    elif "build" in path.extractFilename().toLowerAscii() and path.splitFile().ext == ".sh":
+      info fmt"Attempting to build package with file {path}..."
+      if (let ex = execCmdEx(fmt"sh {path}"); ex.exitCode != 0):
+        error fmt"Failed to run shell script {path}: {ex.output}"
+      else:
+        success fmt"Successfully ran shell script {path}"
+        built = true
+  if not built:
+    error "No build files could be made."
+    var i = prompt("Would you like to remove the repository?")
+    if i:
+      removeDir(nerveDir / pkg.pkgFormat().toLowerAscii())
+      return
+  pkg.walkForExec()
+
 proc extract*(pkg: Package, path, toDir: string, make = true) =
-  ## Extracts `path` inside `toDir` directory.
   dest = toDir
+  dup = pkg.duplicate()
+  ## Extracts `path` inside `toDir` directory.
   info "Extracting files"
-  for p in walkDir(nerveDir):
-    if pkg.pkgFormat() in p.path:
-      duplicate = true
-      break
   try:
     #toDir should be called a package version of the repo name, in nerve directory
     #path is downloadPath in github.nim
@@ -75,31 +123,3 @@ proc extract*(pkg: Package, path, toDir: string, make = true) =
   info "Adding executables to bin"
 
   walkForExec(pkg)
-
-proc makeSymlink(file:string, pkg:Package) =
-  case file.splitFile().ext:
-  of "":
-    if not file.hasExecPerms() and file.splitFile().name.isExecFile():
-      file.setFilePermissions({fpUserExec, fpOthersExec, fpUserRead, fpUserWrite, fpOthersRead, fpOthersWrite})
-    if file.hasExecPerms() and file.splitFile().name.isExecFile():
-      var name: string
-      try:
-        if not duplicate:
-          name = file.splitFile().name
-        else:
-          name = fmt"{file.splitFile().name}@{pkg.tag}"
-        file.createSymlink(binDir / name)
-      except:
-        error fmt"Failed to create symlink for {file}"
-      success fmt"Created symlink {name}"
-  of ".AppImage":
-    var name: string
-    try:
-      if not duplicate:
-        name = pkg.repo
-      else:
-        name = fmt"{pkg.repo}@{pkg.tag}"
-      file.createSymlink(binDir / name)
-    except:
-      fatal fmt"Failed to create symlink for {pkg.repo}"
-    success fmt"Created symlink {pkg.repo}"

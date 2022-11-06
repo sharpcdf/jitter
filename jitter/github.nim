@@ -11,11 +11,15 @@ let nerveDir = baseDir / "nerve"
 
 #Clones and builds the repo
 proc ghBuild*(pkg: Package) =
-  let url = fmt"https://github.com/{pkg.owner}/{pkg.repo}"
-  if (let op = execCmdEx(&"git {url} {nerveDir}/{pkg.pkgFormat()}/"); op.exitCode != 0):
-    fatal fmt"Failed to clone git repository: {op.output}"
-  make()
-  walkForExec(pkg)
+  let p = package(pkg.owner, pkg.repo, "current")
+  info fmt"Attempting to build {p.owner}/{p.repo}"
+  let dup = pkg.duplicate()
+  info "Cloning repository..."
+  let url = fmt"https://github.com/{p.owner}/{p.repo}"
+  if (let ex = execCmdEx(&"git clone {url} {nerveDir}/{p.pkgFormat()}/"); ex.exitCode != 0):
+    fatal fmt"Failed to clone git repository: {ex.output}"
+  p.build(dup)
+
 proc ghListReleases*(pkg: Package): seq[string] = 
   ## List and return pkg release tags.
   let url = fmt"https://api.github.com/repos/{pkg.owner}/{pkg.repo}/releases"
@@ -62,6 +66,7 @@ proc ghSearch*(repo: string, exactmatch: bool = false): seq[Package] =
         continue
 
 proc downloadRelease(pkg: Package, make = true) =
+  
   let url = 
     if pkg.tag == "":
       fmt"https://api.github.com/repos/{pkg.owner}/{pkg.repo}/releases/latest"
@@ -127,7 +132,7 @@ proc ghDownload*(repo: string, make = true, build = false) =
       let yes = prompt("Are you sure you want to install this repository?")
       if yes:
         if not build:
-          pkg.ghDownload()
+          pkg.ghDownload(make, build)
         else:
           pkg.ghBuild()
         return

@@ -1,5 +1,8 @@
 import std/[strformat, strutils, strscans, os]
-import log
+
+let baseDir = getHomeDir() & ".jitter/"
+let nerveDir = baseDir / "nerve"
+
 type
   Package* = object
     owner*, repo*, tag*: string
@@ -54,10 +57,13 @@ proc isCompatibleOS*(file: string): bool =
       return false
 
 proc isExecFile*(file:string): bool = 
-  if file.startsWith(".") or file.toLowerAscii() == "makefile" or "license" in file.toLowerAscii():
+  if file.splitFile().name.startsWith(".") or file.splitFile().name.toLowerAscii() == "makefile" or "license" in file.splitFile().name.toLowerAscii() or file.splitFile().ext != "":
     return false
   else:
-    return true
+    if file.getFileInfo().kind == pcDir:
+      return false
+    else:
+      return true
 
 proc hasExecPerms*(file: string): bool =
   let perms = getFilePermissions(file)
@@ -65,18 +71,6 @@ proc hasExecPerms*(file: string): bool =
     return true
   else:
     return false
-
-proc prompt*(question: string): bool =
-  ask fmt"{question} [y/n]"
-  let r = stdin.readLine().strip()
-  case r.toLowerAscii():
-  of "n", "no":
-    return false
-  of "y", "yes":
-    return true
-  else:
-    error "Invalid answer given."
-    prompt(question)
   
 proc validIdent(input: string, strVal: var string, start: int, validChars = IdentChars + {'.', '-'}): int =
   while start + result < input.len and input[start + result] in validChars:
@@ -109,3 +103,9 @@ proc gitFormat*(pkg: Package): string =
 
 proc pkgFormat*(pkg: Package): string = 
   return fmt"{pkg.owner.toLowerAscii()}::{pkg.repo.toLowerAscii()}::{pkg.tag}"
+
+proc duplicate*(pkg:Package): bool =
+  for p in walkDir(nerveDir):
+    if &"{pkg.owner}::{pkg.repo}" in p.path.splitPath().tail:
+      #echo fmt"for some reason its true: {pkg.owner}::{pkg.repo} is in {p.path.splitPath().tail}"
+      return true
