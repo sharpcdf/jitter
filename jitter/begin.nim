@@ -1,4 +1,4 @@
-import std/[strformat, sequtils, strutils, terminal, os]
+import std/[strformat, sequtils, strutils, terminal, os, httpclient, json]
 import parse, github, log
 
 let baseDir = getHomeDir() / ".jitter"
@@ -19,7 +19,7 @@ proc search*(query: string, exactmatch = false) =
     discard pkg.ghListReleases()
   else:
     for pkg in query.ghSearch(exactmatch):
-      list &"Github: {pkg.gitFormat()}"
+      list fmt"(Github) {pkg.pkg.gitFormat()}: {pkg.description}"
 
 proc setup*() =
   if dirExists(getHomeDir() / ".jitter"):
@@ -135,24 +135,7 @@ proc remove*(input: string) =
 
   success "Done"
 
-proc selfUpdate*() =
-  ghDownload(parsePkgFormat("sharpcdf/jitter").pkg, true)
-  var downloaded = false
-  var pkg: string
-  for p in getInstalledPkgs():
-    if p.owner == "sharpcdf" and p.repo == "jitter":
-      downloaded = true
-      pkg = p.pkgFormat()
-      break
-  if not downloaded:
-    fatal "Failed to update Jitter to latest version"
-  copyFile(nerveDir / pkg, getAppDir() / getAppFilename())
-  success "Successfully updated Jitter to the latest version!"
-
 proc update*(input: string, make = true) =
-  if input.toLowerAscii() in ["this", "jtr", "jitter"]:
-    selfUpdate()
-    return
   if input.toLowerAscii() == "all":
     for pkg in getInstalledPkgs():
       pkg.remove()

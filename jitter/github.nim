@@ -44,7 +44,7 @@ proc ghListReleases*(pkg: Package): seq[string] =
     list release["tag_name"].getStr()
     result.add(release["tag_name"].getStr())
 
-proc ghSearch*(repo: string, exactmatch: bool = false): seq[Package] = 
+proc ghSearch*(repo: string, exactmatch: bool = false): seq[Repository] = 
   let url = "https://api.github.com/search/repositories?" & encodeQuery({"q": repo})
   let client = newHttpClient()
   var content: string
@@ -58,10 +58,10 @@ proc ghSearch*(repo: string, exactmatch: bool = false): seq[Package] =
 
   for r in content.parseJson()["items"]:
     if not exactmatch:
-      result.add(parsePkgFormat(r["full_name"].getStr()).pkg)
+      result.add(repo(parsePkgFormat(r["full_name"].getStr()).pkg, r["description"].getStr()))
     else:
       if r["name"].getStr().toLowerAscii() == repo.toLowerAscii():
-        result.add(parsePkgFormat(r["full_name"].getStr()).pkg)
+        result.add(repo(parsePkgFormat(r["full_name"].getStr()).pkg, r["description"].getStr()))
       else:
         continue
 
@@ -127,14 +127,14 @@ proc ghDownload*(pkg: Package, make = true, build = false) =
 proc ghDownload*(repo: string, make = true, build = false) = 
   let pkgs = repo.ghSearch(true)
   for pkg in pkgs:
-    if pkg.repo.toLowerAscii() == repo.toLowerAscii():
-      success fmt"Repository found: {pkg.gitFormat()}"
+    if pkg.pkg.repo.toLowerAscii() == repo.toLowerAscii():
+      success fmt"Repository found: {pkg.pkg.gitFormat()}"
       let yes = prompt("Are you sure you want to install this repository?")
       if yes:
         if not build:
-          pkg.ghDownload(make, build)
+          pkg.pkg.ghDownload(make, build)
         else:
-          pkg.ghBuild()
+          pkg.pkg.ghBuild()
         return
       else:
         continue

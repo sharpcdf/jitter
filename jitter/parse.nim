@@ -14,6 +14,10 @@ type
     SourceHut,
     CodeBerg
 
+  Repository* = object
+    pkg*: Package
+    description*: string
+
 const
   # Supported
   extensions = [".tar.gz", ".tgz", ".zip", ".AppImage"]
@@ -23,6 +27,9 @@ const
 
 proc package*(owner, repo, tag: string): Package = 
   return Package(owner: owner, repo: repo, tag: tag)
+
+proc repo*(pkg: Package, d: string): Repository =
+  return Repository(pkg: pkg, description: d)
 
 proc parseInputSource*(input: string): tuple[source: SourceType, output: string] =
   ## Parses the source prefix and returns the (source, input without the preffix).

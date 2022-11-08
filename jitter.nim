@@ -1,8 +1,8 @@
-import std/[strformat, sequtils, strutils, terminal, os]
+import std/[sequtils, strutils, terminal, os]
 
 import argparse
 
-import jitter/[begin, log]
+import jitter/[begin, log, update]
 
 #TODO add 'jtr update all' to update all packages
 #TODO add config file to manage bin & download directory
@@ -17,8 +17,11 @@ const parser = newParser:
   flag("-v", "--version")                                ## Create a version flag
   flag("--no-make", help = "If makefiles are found in the downloaded package, Jitter ignores them. By default, Jitter runs all found makefiles.") ## Create a no-make flag
   flag("--exactmatch", help = "When searching for a repository, only repositories with the query AS THEIR NAME will be shown. Jitter shows any repository returned by the query.")
-  flag("-g", help = "Clones the repo, and looks for makefiles or supported file types to build, then adds built executables to the bin")
+  flag("-g", help = "Clones the repo, and looks for makefiles or supported file types to build, then adds built executables to the bin.")
+  flag("-q", "--quiet", help = "Runs jitter, logging only fatals and errors.")
+  flag("--upgrade")
   run:
+    log.setQuiet(opts.quiet)
     if opts.version:                                     ## If the version flag was passed
       styledEcho(fgCyan, "Jitter version ", fgYellow, version)
       styledEcho("For more information visit ", fgGreen, "https://github.com/sharpcdf/jitter")
@@ -28,11 +31,17 @@ const parser = newParser:
     arg("input")                                         ## Positional argument called input
     run:
       opts.input.install(not opts.parentOpts.nomake, opts.parentOpts.g)
+
   command("update"):                                     ## Create an update command
     help("Updates the specified package, Jitter itself, or all packages if specified.           [user/repo[@tag]][all][this|jitter|jtr]") ## Help message
     arg("input")                                         ## Positional argument called input
     run:
-      opts.input.update(not opts.parentOpts.nomake)
+      if opts.input == "upgrade":
+        upgrade()
+      elif opts.input != "jtr":
+        opts.input.update(not opts.parentOpts.nomake)
+      else:
+        selfUpdate()
   command("remove"):                                     ## Create a remove command
     help("Removes the specified package from your system.                                       user/repo[@tag]") ## Help message
     arg("input")                                         ## Positional arugment called input
@@ -55,6 +64,7 @@ const parser = newParser:
     help("Creates needed directories if they do not exist")
     run:
       setup()
+
 when isMainModule:
   if commandLineParams().len == 0:
     parser.run(@["--help"])

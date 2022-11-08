@@ -1,14 +1,18 @@
 import std/[terminal, strformat, strutils]
 
+var quiet: bool
+
 proc info*(s: string) =
-  styledEcho({styleBright}, fgCyan, "[I]", resetStyle, " ", fgBlue, styleUnderscore, s)
+  if not quiet:
+    styledEcho({styleBright}, fgCyan, "[I]", resetStyle, " ", fgBlue, styleUnderscore, s)
 
 proc fatal*(s: string) =
   styledEcho({styleBright}, fgRed, "[F]", resetStyle, " ", fgRed, styleUnderscore, s)
   quit(1)
 
 proc success*(s: string) =
-  styledEcho({styleBright}, fgGreen, "[S]", resetStyle, " ", fgGreen, styleItalic, s)
+  if not quiet:
+    styledEcho({styleBright}, fgGreen, "[S]", resetStyle, " ", fgGreen, styleItalic, s)
 
 proc list*(s: string) =
   styledEcho({styleBright, styleItalic}, fgMagenta, s)
@@ -30,3 +34,9 @@ proc prompt*(question: string): bool =
   else:
     error "Invalid answer given."
     prompt(question)
+
+proc setQuiet*(q: bool) =
+  if q:
+    quiet = true
+  else:
+    quiet = false
