@@ -1,4 +1,7 @@
 # Jitter
+
+**NOTICE: Jitter was made for experimental purposes, and for personal use. I have no need to update it in its current state as the current bugs are not very intrusive. I will still look at pull requests and I may update this occasionally, but I will be focusing on other projects.**
+
 A repository-oriented binary manager for Linux
 
 ## How it works
