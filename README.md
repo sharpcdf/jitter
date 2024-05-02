@@ -1,8 +1,8 @@
 # Jitter
-
-**NOTICE: Jitter was made for experimental purposes, and for personal use. I have no need to update it in its current state as the current bugs are not very intrusive. I will still look at pull requests and I may update this occasionally, but I will be focusing on other projects.**
-
 A repository-oriented binary manager for Linux
+
+# Notice
+I may revist this project and rework it in the future.
 
 ## How it works
 Jitter searches through GitHub(and hopefully soon more sources) for releases with `.tar.gz`, `.tgz`, `.zip` or `.AppImage` assets. Unlike Homebrew or similar package managers, Jitter does not require a brewfile or nixfile in order to recognize the project.
